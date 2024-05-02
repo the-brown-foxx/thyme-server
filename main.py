@@ -2,9 +2,8 @@ from fastapi import FastAPI, status
 
 from service.registry.actual_car_registry import ActualCarRegistry
 from service.registry.car_registry import CarRegistry
-from service.registry.model.car import Car
-from service.registry.repository.dummy_car_repository import DummyCarRepository
 from service.registry.exception.get_car_exception import CarNotFound
+from service.registry.repository.dummy_car_repository import DummyCarRepository
 
 app = FastAPI()
 
