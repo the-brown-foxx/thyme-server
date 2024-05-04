@@ -1,3 +1,6 @@
+from constants import min_password_length
+
+
 class CarNotFoundError(Exception):
 
     registration_id: str
@@ -17,6 +20,17 @@ class FieldCannotBeBlankError(Exception):
     def __init__(self, field_name: str):
         self.field_name = field_name
         self.message = f"Field {field_name} cannot be blank"
+
+    def __str__(self):
+        return self.message
+
+
+class PasswordTooShortError(Exception):
+
+    min_length: int = min_password_length
+
+    def __init__(self):
+        self.message = f"Password must be at least {self.min_length} characters long"
 
     def __str__(self):
         return self.message

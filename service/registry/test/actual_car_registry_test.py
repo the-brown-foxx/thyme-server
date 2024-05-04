@@ -4,13 +4,13 @@ from hash.hashed_str import hash_matches
 from service.registry.actual_car_registry import ActualCarRegistry
 from service.registry.model.car import SetPasswordCar
 from service.registry.model.car_update import CarUpdate
-from service.registry.model.exception import CarNotFoundError, FieldCannotBeBlankError
+from service.registry.model.exception import CarNotFoundError, FieldCannotBeBlankError, PasswordTooShortError
 from service.registry.model.new_car import NewCar
 from service.registry.repository.dummy_car_repository import DummyCarRepository
 
 
 class ActualCarRegistryTest(unittest.TestCase):
-    car_registry = ActualCarRegistry(DummyCarRepository())
+    car_registry: ActualCarRegistry
     preregistered_cars = [
         NewCar(
             registration_id="4",
@@ -29,24 +29,26 @@ class ActualCarRegistryTest(unittest.TestCase):
     ]
 
     def setUp(self):
+        self.car_registry = ActualCarRegistry(DummyCarRepository())
         for preregistered_car in self.preregistered_cars:
             self.car_registry.register_car(preregistered_car)
 
     def test_get_cars(self):
-        registered_cars = self.car_registry.get_cars()
-        self.assertEqual(len(self.preregistered_cars), len(registered_cars))
-        for index in range(len(self.preregistered_cars)):
-            registered_car = registered_cars[index]
-            self.assertEqual(
-                self.preregistered_cars[index],
-                NewCar(
-                    registration_id=registered_car.registration_id,
-                    make=registered_car.make,
-                    model=registered_car.model,
-                    year=registered_car.year,
-                    owner=registered_car.owner,
+        self.assertListEqual(
+            self.preregistered_cars,
+            list(
+                map(
+                    lambda registered_car: NewCar(
+                        registration_id=registered_car.registration_id,
+                        make=registered_car.make,
+                        model=registered_car.model,
+                        year=registered_car.year,
+                        owner=registered_car.owner,
+                    ),
+                    self.car_registry.get_cars(),
                 ),
-            )
+            ),
+        )
 
     def test_get_car(self):
         for index in range(len(self.preregistered_cars)):
@@ -100,7 +102,7 @@ class ActualCarRegistryTest(unittest.TestCase):
                 )
             )
 
-            error_context.exception.field_name = "registration_id"
+            self.assertEqual(error_context.exception.field_name, "registration_id")
 
         with self.assertRaises(FieldCannotBeBlankError) as error_context:
             self.car_registry.register_car(
@@ -113,7 +115,7 @@ class ActualCarRegistryTest(unittest.TestCase):
                 )
             )
 
-            error_context.exception.field_name = "make"
+            self.assertEqual(error_context.exception.field_name, "make")
 
         with self.assertRaises(FieldCannotBeBlankError) as error_context:
             self.car_registry.register_car(
@@ -126,7 +128,7 @@ class ActualCarRegistryTest(unittest.TestCase):
                 )
             )
 
-            error_context.exception.field_name = "model"
+            self.assertEqual(error_context.exception.field_name, "model")
 
         with self.assertRaises(FieldCannotBeBlankError) as error_context:
             self.car_registry.register_car(
@@ -139,7 +141,7 @@ class ActualCarRegistryTest(unittest.TestCase):
                 )
             )
 
-            error_context.exception.field_name = "owner"
+            self.assertEqual(error_context.exception.field_name, "owner")
 
     def test_update_car(self):
         registration_id = self.preregistered_cars[0].registration_id
@@ -183,59 +185,64 @@ class ActualCarRegistryTest(unittest.TestCase):
         self.assertTrue(hash_matches(updated_car.password, new_password))
 
     def test_update_car_field_cannot_be_blank(self):
+        registration_id = self.preregistered_cars[0].registration_id
         with self.assertRaises(FieldCannotBeBlankError) as error_context:
             self.car_registry.update_car(
                 CarUpdate(
-                    registration_id="",
-                    make="Ferrari",
-                )
-            )
-
-            error_context.exception.field_name = "registration_id"
-
-        with self.assertRaises(FieldCannotBeBlankError) as error_context:
-            self.car_registry.update_car(
-                CarUpdate(
-                    registration_id="16",
+                    registration_id=registration_id,
                     make="",
                 )
             )
 
-            error_context.exception.field_name = "make"
+            self.assertEqual(error_context.exception.field_name, "make")
 
         with self.assertRaises(FieldCannotBeBlankError) as error_context:
             self.car_registry.update_car(
                 CarUpdate(
-                    registration_id="16",
+                    registration_id=registration_id,
                     model="",
                 )
             )
 
-            error_context.exception.field_name = "model"
+            self.assertEqual(error_context.exception.field_name, "model")
 
         with self.assertRaises(FieldCannotBeBlankError) as error_context:
             self.car_registry.update_car(
                 CarUpdate(
-                    registration_id="16",
+                    registration_id=registration_id,
                     owner="",
                 )
             )
 
-            error_context.exception.field_name = "owner"
+            self.assertEqual(error_context.exception.field_name, "owner")
 
-        with self.assertRaises(FieldCannotBeBlankError) as error_context:
+    def test_update_car_password_too_short(self):
+        registration_id = self.preregistered_cars[0].registration_id
+        with self.assertRaises(PasswordTooShortError):
             self.car_registry.update_car(
                 CarUpdate(
-                    registration_id="16",
-                    password="",
+                    registration_id=registration_id,
+                    password="short",
                 )
             )
 
-            error_context.exception.field_name = "password"
-
     def test_unregister_car(self):
         self.car_registry.unregister_car(self.preregistered_cars[0].registration_id)
-        self.assertListEqual(self.preregistered_cars[1:], self.car_registry.get_cars())
+        self.assertListEqual(
+            self.preregistered_cars[1:],
+            list(
+                map(
+                    lambda registered_car: NewCar(
+                        registration_id=registered_car.registration_id,
+                        make=registered_car.make,
+                        model=registered_car.model,
+                        year=registered_car.year,
+                        owner=registered_car.owner,
+                    ),
+                    self.car_registry.get_cars(),
+                ),
+            ),
+        )
 
     def test_unregister_car_car_not_found(self):
         with self.assertRaises(CarNotFoundError):
