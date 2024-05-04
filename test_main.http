@@ -5,7 +5,50 @@ Accept: application/json
 
 ###
 
-GET http://127.0.0.1:8069/cars/44
+GET http://127.0.0.1:8069/cars/55
+Accept: application/json
+
+###
+
+POST http://127.0.0.1:8069/cars
+Accept: application/json
+Content-Type: application/json
+
+{
+  "registration_id": "55",
+  "make": "Ferrari",
+  "model": "SF-24",
+  "year": 2024,
+  "owner": "Carlos Sainz"
+}
+
+###
+
+PATCH http://127.0.0.1:8069/cars
+Accept: application/json
+Content-Type: application/json
+
+{
+  "registration_id": "55",
+  "owner": "Lewis Hamilton",
+  "model": "SF-25",
+  "year": 2025
+}
+
+###
+
+PATCH http://127.0.0.1:8069/cars
+Accept: application/json
+Content-Type: application/json
+
+{
+  "registration_id": "55",
+  "password": "F*** Carlos"
+}
+
+###
+
+DELETE http://127.0.0.1:8069/cars/55
 Accept: application/json
 
 ###

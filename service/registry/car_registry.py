@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 from service.registry.model.car import Car
+from service.registry.model.new_car import NewCar
+from service.registry.model.car_update import CarUpdate
 
 
 class CarRegistry(ABC):
@@ -15,9 +17,13 @@ class CarRegistry(ABC):
         pass
 
     @abstractmethod
-    def upsert_car(self, car: Car):
+    def register_car(self, car: NewCar):
         pass
 
     @abstractmethod
-    def delete_car(self, registration_id: str):
+    def update_car(self, car: CarUpdate):
+        pass
+
+    @abstractmethod
+    def unregister_car(self, registration_id: str):
         pass
