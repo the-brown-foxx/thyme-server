@@ -3,7 +3,8 @@ from hash.hashed_str import hash_str
 from service.registry.car_registry import CarRegistry
 from service.registry.model.car import Car, UnsetPasswordCar, SetPasswordCar
 from service.registry.model.car_update import CarUpdate
-from service.registry.model.exception import CarNotFoundError, FieldCannotBeBlankError, PasswordTooShortError
+from service.registry.model.exception import CarNotFoundError, FieldCannotBeBlankError, PasswordTooShortError, \
+    RegistrationIdTakenError
 from service.registry.model.new_car import NewCar
 from service.registry.repository.car_repository import CarRepository
 
@@ -25,6 +26,9 @@ class ActualCarRegistry(CarRegistry):
             return car
 
     def register_car(self, new_car: NewCar):
+        if self.car_repository.get_car(new_car.registration_id) is not None:
+            raise RegistrationIdTakenError(new_car.registration_id)
+
         if new_car.registration_id == "":
             raise FieldCannotBeBlankError("registration_id")
         elif new_car.make == "":

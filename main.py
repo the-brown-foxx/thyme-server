@@ -7,12 +7,13 @@ from pydantic import BaseModel
 
 from service.registry.actual_car_registry import ActualCarRegistry
 from service.registry.car_registry import CarRegistry
-from service.registry.model.exception import CarNotFoundError, FieldCannotBeBlankError, PasswordTooShortError
-from service.registry.repository.dummy_car_repository import DummyCarRepository
+from service.registry.model.exception import CarNotFoundError, FieldCannotBeBlankError, PasswordTooShortError, \
+    RegistrationIdTakenError
+from service.registry.repository.actual_car_repository import ActualCarRepository
 
 app = FastAPI()
 
-car_registry: CarRegistry = ActualCarRegistry(DummyCarRepository())  # TODO: replace this with the actual
+car_registry: CarRegistry = ActualCarRegistry(ActualCarRepository())
 
 
 @app.exception_handler(CarNotFoundError)
@@ -21,6 +22,18 @@ async def car_not_found_exception_handler(_, exception: CarNotFoundError):
         status_code=status.HTTP_404_NOT_FOUND,
         content={
             "status": "CAR_NOT_FOUND",
+            "registration_id": exception.registration_id,
+            "message": exception.message,
+        },
+    )
+
+
+@app.exception_handler(RegistrationIdTakenError)
+async def registration_id_taken_exception_handler(_, exception: RegistrationIdTakenError):
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content={
+            "status": "REGISTRATION_ID_TAKEN",
             "registration_id": exception.registration_id,
             "message": exception.message,
         },
@@ -47,6 +60,17 @@ async def password_too_short_exception_handler(_, exception: PasswordTooShortErr
             "status": "PASSWORD_TOO_SHORT",
             "min_length": exception.min_length,
             "message": exception.message,
+        },
+    )
+
+
+@app.exception_handler(Exception)
+async def car_not_found_exception_handler(_, exception: Exception):
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={
+            "status": "INTERNAL_SERVER_ERROR",
+            "message": str(exception),
         },
     )
 

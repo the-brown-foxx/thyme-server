@@ -13,6 +13,18 @@ class CarNotFoundError(Exception):
         return self.message
 
 
+class RegistrationIdTakenError(Exception):
+
+    registration_id: str
+
+    def __init__(self, registration_id: str):
+        self.registration_id = registration_id
+        self.message = f"Registration ID {registration_id} is already taken"
+
+    def __str__(self):
+        return self.message
+
+
 class FieldCannotBeBlankError(Exception):
 
     field_name: str
