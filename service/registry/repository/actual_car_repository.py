@@ -62,10 +62,9 @@ class ActualCarRepository(CarRepository):
 
     def upsert_car(self, car: Car):
         new_car_entity = car_to_car_entity(car)
-        old_car_entity = car_to_car_entity(self.get_car(car.registration_id))
-        if old_car_entity is None:
-            new_car_entity.save()
-        else:
+
+        try:
+            old_car_entity = CarEntity.get(CarEntity.registration_id == car.registration_id)
             old_car_entity.make = new_car_entity.make
             old_car_entity.model = new_car_entity.model
             old_car_entity.year = new_car_entity.year
@@ -74,17 +73,8 @@ class ActualCarRepository(CarRepository):
             old_car_entity.password_hash = new_car_entity.password_hash
             old_car_entity.password_salt = new_car_entity.password_salt
             old_car_entity.save()
-
-        # CarEntity.insert(
-        #     registration_id=car_entity.registration_id,
-        #     make=car_entity.make,
-        #     model=car_entity.model,
-        #     year=car_entity.year,
-        #     owner=car_entity.owner,
-        #     temporary_password=car_entity.temporary_password,
-        #     password_hash=car_entity.password_hash,
-        #     password_salt=car_entity.password_salt,
-        # ).execute()
+        except DoesNotExist:
+            new_car_entity.save()
 
     def delete_car(self, registration_id: str) -> Optional[int]:
         query = CarEntity.delete().where(CarEntity.registration_id == registration_id)
