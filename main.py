@@ -8,11 +8,11 @@ from pydantic import BaseModel
 from service.registry.actual_car_registry import ActualCarRegistry
 from service.registry.car_registry import CarRegistry
 from service.registry.model.exception import CarNotFoundError, FieldCannotBeBlankError, PasswordTooShortError
-from service.registry.repository.dummy_car_repository import DummyCarRepository
+from service.registry.repository.actual_car_repository import ActualCarRepository
 
 app = FastAPI()
 
-car_registry: CarRegistry = ActualCarRegistry(DummyCarRepository())  # TODO: replace this with the actual
+car_registry: CarRegistry = ActualCarRegistry(ActualCarRepository())
 
 
 @app.exception_handler(CarNotFoundError)
@@ -50,6 +50,15 @@ async def password_too_short_exception_handler(_, exception: PasswordTooShortErr
         },
     )
 
+@app.exception_handler(Exception)
+async def car_not_found_exception_handler(_, exception: Exception):
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={
+            "status": "INTERNAL_SERVER_ERROR",
+            "message": str(exception),
+        },
+    )
 
 @app.get("/cars", status_code=status.HTTP_200_OK)
 async def get_cars():

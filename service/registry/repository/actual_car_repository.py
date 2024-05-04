@@ -61,17 +61,30 @@ class ActualCarRepository(CarRepository):
             return None
 
     def upsert_car(self, car: Car):
-        car_entity = car_to_car_entity(car)
-        CarEntity.insert(
-            registration_id=car_entity.registration_id,
-            make=car_entity.make,
-            model=car_entity.model,
-            year=car_entity.year,
-            owner=car_entity.owner,
-            temporary_password=car_entity.temporary_password,
-            password_hash=car_entity.password_hash,
-            password_salt=car_entity.password_salt,
-        ).on_conflict(conflict_target=[CarEntity.registration_id], preserve=[CarEntity.registration_id]).execute()
+        new_car_entity = car_to_car_entity(car)
+        old_car_entity = car_to_car_entity(self.get_car(car.registration_id))
+        if old_car_entity is None:
+            new_car_entity.save()
+        else:
+            old_car_entity.make = new_car_entity.make
+            old_car_entity.model = new_car_entity.model
+            old_car_entity.year = new_car_entity.year
+            old_car_entity.owner = new_car_entity.owner
+            old_car_entity.temporary_password = new_car_entity.temporary_password
+            old_car_entity.password_hash = new_car_entity.password_hash
+            old_car_entity.password_salt = new_car_entity.password_salt
+            old_car_entity.save()
+
+        # CarEntity.insert(
+        #     registration_id=car_entity.registration_id,
+        #     make=car_entity.make,
+        #     model=car_entity.model,
+        #     year=car_entity.year,
+        #     owner=car_entity.owner,
+        #     temporary_password=car_entity.temporary_password,
+        #     password_hash=car_entity.password_hash,
+        #     password_salt=car_entity.password_salt,
+        # ).execute()
 
     def delete_car(self, registration_id: str) -> Optional[int]:
         query = CarEntity.delete().where(CarEntity.registration_id == registration_id)
