@@ -3,11 +3,11 @@ from fastapi import FastAPI, status
 from service.registry.actual_car_registry import ActualCarRegistry
 from service.registry.car_registry import CarRegistry
 from service.registry.model.exception import CarNotFoundError
-from service.registry.repository.dummy_car_repository import DummyCarRepository
+from service.registry.repository.actual_car_repository import ActualCarRepository
 
 app = FastAPI()
 
-car_registry: CarRegistry = ActualCarRegistry(DummyCarRepository())  # TODO: replace this with the actual
+car_registry: CarRegistry = ActualCarRegistry(ActualCarRepository())
 
 
 @app.get("/cars", status_code=status.HTTP_200_OK)
