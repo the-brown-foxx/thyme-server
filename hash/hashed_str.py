@@ -16,5 +16,5 @@ def hash_str(plaintext: str, salt: str = urandom(16).hex()) -> HashedStr:
     )
 
 
-def hash_matches(hashed_str: HashedStr, password: str) -> bool:
-    return hash_str(plaintext=password, salt=hashed_str.salt).value == hashed_str.value
+def hash_matches(hashed_str: HashedStr, plaintext: str) -> bool:
+    return hash_str(plaintext=plaintext, salt=hashed_str.salt).value == hashed_str.value

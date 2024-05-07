@@ -2,8 +2,8 @@ from constants import min_password_length
 
 
 class CarNotFoundError(Exception):
-
     registration_id: str
+    message: str
 
     def __init__(self, registration_id: str):
         self.registration_id = registration_id
@@ -14,8 +14,8 @@ class CarNotFoundError(Exception):
 
 
 class RegistrationIdTakenError(Exception):
-
     registration_id: str
+    message: str
 
     def __init__(self, registration_id: str):
         self.registration_id = registration_id
@@ -26,8 +26,8 @@ class RegistrationIdTakenError(Exception):
 
 
 class FieldCannotBeBlankError(Exception):
-
     field_name: str
+    message: str
 
     def __init__(self, field_name: str):
         self.field_name = field_name
@@ -38,11 +38,31 @@ class FieldCannotBeBlankError(Exception):
 
 
 class PasswordTooShortError(Exception):
-
     min_length: int = min_password_length
+    message: str
 
     def __init__(self):
         self.message = f"Password must be at least {self.min_length} characters long"
+
+    def __str__(self):
+        return self.message
+
+
+class IncorrectPasswordError(Exception):
+    message: str
+
+    def __init__(self):
+        self.message = "Incorrect password"
+
+    def __str__(self):
+        return self.message
+
+
+class InvalidTokenError(Exception):
+    message: str
+
+    def __init__(self):
+        self.message = "Invalid token"
 
     def __str__(self):
         return self.message

@@ -3,7 +3,7 @@ from hash.hashed_str import hash_str
 from service.registry.car_registry import CarRegistry
 from service.registry.model.car import Car, UnsetPasswordCar, SetPasswordCar
 from service.registry.model.car_update import CarUpdate
-from service.registry.model.exception import CarNotFoundError, FieldCannotBeBlankError, PasswordTooShortError, \
+from service.exception import CarNotFoundError, FieldCannotBeBlankError, PasswordTooShortError, \
     RegistrationIdTakenError
 from service.registry.model.new_car import NewCar
 from service.registry.repository.car_repository import CarRepository
@@ -81,7 +81,6 @@ class ActualCarRegistry(CarRegistry):
                 )
                 self.car_repository.upsert_car(new_car)
             else:
-
                 new_car = SetPasswordCar(
                     registration_id=registration_id,
                     make=make,

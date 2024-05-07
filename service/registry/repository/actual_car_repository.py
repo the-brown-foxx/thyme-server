@@ -70,8 +70,8 @@ class ActualCarRepository(CarRepository):
             old_car_entity.year = new_car_entity.year
             old_car_entity.owner = new_car_entity.owner
             old_car_entity.temporary_password = new_car_entity.temporary_password
-            old_car_entity.password_hash = new_car_entity.password_hash
-            old_car_entity.password_salt = new_car_entity.password_salt
+            old_car_entity.hash = new_car_entity.password_hash
+            old_car_entity.salt = new_car_entity.password_salt
             old_car_entity.save()
         except DoesNotExist:
             new_car_entity.save()
