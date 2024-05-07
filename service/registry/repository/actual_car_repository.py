@@ -64,7 +64,7 @@ class ActualCarRepository(CarRepository):
         new_car_entity = car_to_car_entity(car)
 
         try:
-            old_car_entity = CarEntity.get(CarEntity.registration_id == car.registration_id)
+            old_car_entity: CarEntity = CarEntity.get(CarEntity.registration_id == car.registration_id)
             old_car_entity.make = new_car_entity.make
             old_car_entity.model = new_car_entity.model
             old_car_entity.year = new_car_entity.year

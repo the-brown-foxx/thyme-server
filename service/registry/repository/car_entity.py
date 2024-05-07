@@ -1,17 +1,8 @@
 from typing import Optional
 
-from peewee import *
-from os import getenv
+from peewee import Model, TextField, IntegerField
 
-POSTGRES_PASSWORD = getenv('POSTGRES_PASSWORD')
-
-postgres_db = PostgresqlDatabase(
-    database='postgres',
-    user='postgres',
-    password=POSTGRES_PASSWORD,
-    host='localhost',
-    port=5469,
-)
+from database.postgres import postgres_db
 
 
 class CarEntity(Model):
