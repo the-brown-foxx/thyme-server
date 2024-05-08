@@ -9,6 +9,7 @@ class Car(ABC):
     make: str
     model: str
     year: int
+    color: str
     owner: str
 
 
@@ -18,6 +19,7 @@ class SetPasswordCar(Car):
     make: str
     model: str
     year: int
+    color: str
     owner: str
     password: HashedStr
 
@@ -28,5 +30,6 @@ class UnsetPasswordCar(Car):
     make: str
     model: str
     year: int
+    color: str
     owner: str
     temporary_password: str

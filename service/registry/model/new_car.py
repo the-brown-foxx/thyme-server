@@ -7,4 +7,5 @@ class NewCar:
     make: str
     model: str
     year: int
+    color: str
     owner: str

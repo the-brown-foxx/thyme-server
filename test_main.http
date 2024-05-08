@@ -20,6 +20,7 @@ Content-Type: application/json
   "make": "Ferrari",
   "model": "SF-24",
   "year": 2024,
+  "color": "red",
   "owner": "Carlos Sainz"
 }
 
@@ -33,7 +34,8 @@ Content-Type: application/json
   "registration_id": "55",
   "owner": "Lewis Hamilton",
   "model": "SF-25",
-  "year": 2025
+  "year": 2025,
+  "color": "red"
 }
 
 ###

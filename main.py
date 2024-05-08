@@ -166,6 +166,7 @@ class NewCar(BaseModel):
     make: str
     model: str
     year: int
+    color: str
     owner: str
 
 
@@ -184,6 +185,7 @@ class CarUpdate(BaseModel):
     make: Optional[str] = None
     model: Optional[str] = None
     year: Optional[int] = None
+    color: Optional[str] = None
     owner: Optional[str] = None
     password: Optional[str] = None
 
