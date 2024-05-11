@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from service.registry.model.car import Car
 
 
-class CarAuthenticator(ABC):
+class CarAuthorizer(ABC):
     @abstractmethod
-    def authenticate_car(self, registration_id: Car):
+    def check_authorization(self, registration_id: str):
         pass
