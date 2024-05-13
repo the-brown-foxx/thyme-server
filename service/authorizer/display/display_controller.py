@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+from service.registry.model.car import Car
+
 
 class DisplayController(ABC):
     @abstractmethod
@@ -7,7 +9,7 @@ class DisplayController(ABC):
         pass
 
     @abstractmethod
-    def show_car_info(self):
+    def show_car_info(self, car: Car):
         pass
 
     @abstractmethod

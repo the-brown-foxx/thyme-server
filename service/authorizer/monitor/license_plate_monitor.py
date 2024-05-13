@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 
-from reactivex.subject import BehaviorSubject
+from reactivex import Observable
 
 
 class LicensePlateMonitor(ABC):
     @abstractmethod
-    def get_license_plate_stream(self) -> BehaviorSubject[str]:
+    def get_registration_id_stream(self) -> Observable[str]:
         pass
