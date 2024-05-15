@@ -1,5 +1,3 @@
-from reactivex.subject import BehaviorSubject
-
 from service.authorizer.access.parking_access_control import ParkingAccessControl
 from service.authorizer.display.display_controller import DisplayController
 from service.authorizer.gate.gate_controller import GateController
