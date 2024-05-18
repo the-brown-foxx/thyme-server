@@ -14,7 +14,7 @@ class AdminAuthenticator(ABC):
         pass
 
     @abstractmethod
-    def change_password(self, old_password: Optional[str], new_password: str) -> object:
+    def change_password(self, old_password: Optional[str], new_password: str):
         pass
 
     @abstractmethod
