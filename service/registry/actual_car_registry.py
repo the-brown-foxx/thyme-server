@@ -43,6 +43,7 @@ class ActualCarRegistry(CarRegistry):
             make=new_car.make,
             model=new_car.model,
             year=new_car.year,
+            color=new_car.color,
             owner=new_car.owner,
             temporary_password=generate_password(),
         )
@@ -69,6 +70,7 @@ class ActualCarRegistry(CarRegistry):
             make = car_update.make if car_update.make is not None else old_car.make
             model = car_update.model if car_update.model is not None else old_car.model
             year = car_update.year if car_update.year is not None else old_car.year
+            color = car_update.color if car_update.color is not None else old_car.color
             owner = car_update.owner if car_update.owner is not None else old_car.owner
             if isinstance(old_car, UnsetPasswordCar) and car_update.password is None:
                 new_car = UnsetPasswordCar(
@@ -76,6 +78,7 @@ class ActualCarRegistry(CarRegistry):
                     make=make,
                     model=model,
                     year=year,
+                    color=color,
                     owner=owner,
                     temporary_password=old_car.temporary_password,
                 )
@@ -86,6 +89,7 @@ class ActualCarRegistry(CarRegistry):
                     make=make,
                     model=model,
                     year=year,
+                    color=color,
                     owner=owner,
                     password=old_car.password if isinstance(old_car, SetPasswordCar) else hash_str(car_update.password),
                 )

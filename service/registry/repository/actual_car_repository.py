@@ -13,6 +13,7 @@ def car_entity_to_car(car_entity: CarEntity):
         make=car_entity.make,
         model=car_entity.model,
         year=car_entity.year,
+        color=car_entity.color,
         owner=car_entity.owner,
         temporary_password=car_entity.temporary_password,
     ) if car_entity.temporary_password is not None else SetPasswordCar(
@@ -20,6 +21,7 @@ def car_entity_to_car(car_entity: CarEntity):
         make=car_entity.make,
         model=car_entity.model,
         year=car_entity.year,
+        color=car_entity.color,
         owner=car_entity.owner,
         password=HashedStr(
             value=car_entity.password_hash,
@@ -34,6 +36,7 @@ def car_to_car_entity(car: Car):
         make=car.make,
         model=car.model,
         year=car.year,
+        color=car.color,
         owner=car.owner,
         temporary_password=car.temporary_password if isinstance(car, UnsetPasswordCar) else None,
         password_hash=car.password.value if isinstance(car, SetPasswordCar) else None,
@@ -68,6 +71,7 @@ class ActualCarRepository(CarRepository):
             old_car_entity.make = new_car_entity.make
             old_car_entity.model = new_car_entity.model
             old_car_entity.year = new_car_entity.year
+            old_car_entity.color = new_car_entity.color
             old_car_entity.owner = new_car_entity.owner
             old_car_entity.temporary_password = new_car_entity.temporary_password
             old_car_entity.password_hash = new_car_entity.password_hash

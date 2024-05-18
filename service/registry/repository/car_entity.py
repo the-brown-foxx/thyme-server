@@ -10,6 +10,7 @@ class CarEntity(Model):
     make: str = TextField()
     model: str = TextField()
     year: int = IntegerField()
+    color: str = TextField()
     owner: str = TextField()
     temporary_password: Optional[str] = TextField(null=True)
     password_hash: Optional[str] = TextField(null=True)

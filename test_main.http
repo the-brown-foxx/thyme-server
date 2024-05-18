@@ -1,7 +1,7 @@
 # Test your FastAPI endpoints
 
 GET http://127.0.0.1:8069/cars
-#Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicGFzc3dvcmRfdmVyc2lvbiI6MTQ3NDIwNTQ3OCwiZXhwaXJ5IjoxNzE1MTYwMzM4LjE1ODI5NH0.s2t7liLGviNQxfmbsuJAEMpCG1gMVAavVFv4YN1xz94
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicGFzc3dvcmRfdmVyc2lvbiI6NDQwNDIxMTAxLCJleHBpcnkiOjE3MTU4NTM4NDQuMzk2NjI3fQ.VAUs2z-ahbyZ8cFFmiiJPIkVBbZr31xSyYXbOAGqdsI
 Accept: application/json
 
 ###
@@ -12,14 +12,16 @@ Accept: application/json
 ###
 
 POST http://127.0.0.1:8069/cars
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwicGFzc3dvcmRfdmVyc2lvbiI6NDQwNDIxMTAxLCJleHBpcnkiOjE3MTYxMDc3NzcuNTc0MjM5fQ.hRHvYFD12sQkmXvLRx6POWRkH7tVJ6puTGeNZImu8G0
 Accept: application/json
 Content-Type: application/json
 
 {
-  "registration_id": "55",
+  "registration_id": "CA455822",
   "make": "Ferrari",
   "model": "SF-24",
   "year": 2024,
+  "color": "red",
   "owner": "Carlos Sainz"
 }
 
@@ -33,7 +35,8 @@ Content-Type: application/json
   "registration_id": "55",
   "owner": "Lewis Hamilton",
   "model": "SF-25",
-  "year": 2025
+  "year": 2025,
+  "color": "red"
 }
 
 ###

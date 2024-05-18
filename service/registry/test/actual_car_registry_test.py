@@ -18,6 +18,7 @@ class ActualCarRegistryTest(unittest.TestCase):
             make="McLaren",
             model="MCL38",
             year=2024,
+            color="Orange",
             owner="Lando Norris",
         ),
         NewCar(
@@ -25,6 +26,7 @@ class ActualCarRegistryTest(unittest.TestCase):
             make="Ferrari",
             model="SF-24",
             year=2024,
+            color="Blue",
             owner="Carlos Sainz",
         ),
     ]
@@ -44,6 +46,7 @@ class ActualCarRegistryTest(unittest.TestCase):
                         make=registered_car.make,
                         model=registered_car.model,
                         year=registered_car.year,
+                        color=registered_car.color,
                         owner=registered_car.owner,
                     ),
                     self.car_registry.get_cars(),
@@ -61,6 +64,7 @@ class ActualCarRegistryTest(unittest.TestCase):
                     make=registered_car.make,
                     model=registered_car.model,
                     year=registered_car.year,
+                    color=registered_car.color,
                     owner=registered_car.owner,
                 ),
             )
@@ -75,6 +79,7 @@ class ActualCarRegistryTest(unittest.TestCase):
             make="Ferrari",
             model="SF-24",
             year=2024,
+            color="red",
             owner="Charles Leclerc",
         )
 
@@ -87,6 +92,7 @@ class ActualCarRegistryTest(unittest.TestCase):
                 make=newly_registered_car.make,
                 model=newly_registered_car.model,
                 year=newly_registered_car.year,
+                color=newly_registered_car.color,
                 owner=newly_registered_car.owner,
             ),
         )
@@ -99,6 +105,7 @@ class ActualCarRegistryTest(unittest.TestCase):
                     make="Ferrari",
                     model="SF-24",
                     year=2024,
+                    color="red",
                     owner="Charles Leclerc",
                 )
             )
@@ -111,6 +118,7 @@ class ActualCarRegistryTest(unittest.TestCase):
                     make="Ferrari",
                     model="SF-24",
                     year=2024,
+                    color="red",
                     owner="Charles Leclerc",
                 )
             )
@@ -124,6 +132,7 @@ class ActualCarRegistryTest(unittest.TestCase):
                     make="",
                     model="SF-24",
                     year=2024,
+                    color="red",
                     owner="Charles Leclerc",
                 )
             )
@@ -137,6 +146,7 @@ class ActualCarRegistryTest(unittest.TestCase):
                     make="Ferrari",
                     model="",
                     year=2024,
+                    color="red",
                     owner="Charles Leclerc",
                 )
             )
@@ -150,6 +160,7 @@ class ActualCarRegistryTest(unittest.TestCase):
                     make="Ferrari",
                     model="SF-24",
                     year=2024,
+                    color="red",
                     owner="",
                 )
             )
@@ -181,6 +192,7 @@ class ActualCarRegistryTest(unittest.TestCase):
         updated_car = self.car_registry.get_car(registration_id)
         self.assertEqual(updated_car.owner, new_owner)
         self.assertEqual(updated_car.year, new_year)
+        self.assertEqual(updated_car.color, self.preregistered_cars[1].color)
         self.assertEqual(updated_car.make, self.preregistered_cars[1].make)
         self.assertEqual(updated_car.model, self.preregistered_cars[1].model)
 
@@ -250,6 +262,7 @@ class ActualCarRegistryTest(unittest.TestCase):
                         make=registered_car.make,
                         model=registered_car.model,
                         year=registered_car.year,
+                        color=registered_car.color,
                         owner=registered_car.owner,
                     ),
                     self.car_registry.get_cars(),
