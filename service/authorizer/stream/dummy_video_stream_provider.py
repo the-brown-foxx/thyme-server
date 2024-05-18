@@ -5,7 +5,7 @@ from service.authorizer.stream.video_stream_provider import VideoStreamProvider
 
 class DummyVideoStreamProvider(VideoStreamProvider):
     def get_stream(self) -> cv2.VideoCapture:
-        return cv2.VideoCapture(0)
+        return cv2.VideoCapture('480p.mp4')
 
     def get_fps(self) -> int:
         return 25

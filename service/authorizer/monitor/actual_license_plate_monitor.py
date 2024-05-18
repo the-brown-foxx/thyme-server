@@ -1,11 +1,12 @@
+from threading import Thread
 from typing import Optional
 
 import cv2
-from reactivex import Observable, Subject
 from easyocr import easyocr, Reader
+from reactivex import Observable, Subject
 from ultralytics import YOLO
 
-from service.authorizer.format.registration_id_format import RegistrationIdFormat
+from service.authorizer.filter.registration_id_filter import RegistrationIdFilter
 from service.authorizer.monitor.license_plate_monitor import LicensePlateMonitor
 from service.authorizer.stream.video_stream_provider import VideoStreamProvider
 
@@ -20,35 +21,36 @@ def annotate_frame(frame, text):
     cv2.putText(frame, text, (0, 0), cv2.FONT_HERSHEY_PLAIN, 1, (255, 0, 0))
 
 
-# TODO: Handle error correction and find a way to not check partially obstructed plate numbers
 class ActualLicensePlateMonitor(LicensePlateMonitor):
+    thread: Thread
+
     model: YOLO
     ocr: Reader
 
     video_stream_provider: VideoStreamProvider
-    registration_id_format: RegistrationIdFormat
+    registration_id_filter: RegistrationIdFilter
 
     old_registration_id: Optional[str]
-    registration_id_stream: Subject[str]()
+    registration_id_stream: Subject[str]
+    filtered_registration_id_stream: Subject[str]
 
     def __init__(
             self,
             video_stream_provider: VideoStreamProvider,
-            registration_id_format: RegistrationIdFormat,
+            registration_id_filter: RegistrationIdFilter,
             headless: bool = True,
     ):
-        self.model = YOLO('service/authorizer/monitor/license_plate_detector.pt')
-        self.ocr = easyocr.Reader(['en'])
-
         self.video_stream_provider = video_stream_provider
-        self.registration_id_format = registration_id_format
+        self.registration_id_filter = registration_id_filter
 
         self.old_registration_id = None
         self.registration_id_stream = Subject()
-        self.start(headless)
+
+        self.thread = Thread(target=self.start, args=(headless, ))
+        self.thread.start()
 
     def crop_license_plate(self, frame):
-        license_plates = self.model(frame)[0]
+        license_plates = self.model(frame, verbose=False)[0]
         try:
             license_plate = license_plates.boxes.data.tolist()[0]
             x1, y1, x2, y2, score, class_id = license_plate
@@ -68,33 +70,36 @@ class ActualLicensePlateMonitor(LicensePlateMonitor):
             return None
 
     def start(self, headless: bool = True):
+        self.model = YOLO('service/authorizer/monitor/license_plate_detector.pt')
+        self.ocr = easyocr.Reader(['en'])
+
         video_stream = self.video_stream_provider.get_stream()
 
         while video_stream.isOpened():
             success, frame = video_stream.read()
 
-            if success:
-                license_plate = self.crop_license_plate(frame)
-                preprocess_license_plate(license_plate)
-                registration_id = self.read_license_plate(license_plate)
+            if not success:
+                break
 
-                if registration_id is not None:
-                    if not headless:
-                        annotate_frame(frame, registration_id)
-                        print(registration_id)
-                        cv2.imshow("YOLOv8 Inference", frame)
+            license_plate = self.crop_license_plate(frame)
+            preprocess_license_plate(license_plate)
+            registration_id = self.read_license_plate(license_plate)
 
-                    if self.registration_id_format.valid(registration_id):
-                        self.registration_id_stream.on_next(registration_id)
+            if registration_id is not None:
+                self.registration_id_stream.on_next(registration_id)
 
                 if not headless:
-                    cv2.imshow("YOLOv8 Inference", frame)
+                    annotate_frame(frame, registration_id)
+                    # print(registration_id)
 
-                if cv2.waitKey(1) & 0xFF == ord("q"):
-                    break
+            if not headless:
+                cv2.imshow("YOLOv8 Inference", frame)
 
-            else:
+            if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
 
     def get_registration_id_stream(self) -> Observable[str]:
-        return self.registration_id_stream
+        return self.registration_id_filter.get_filtered_stream(self.registration_id_stream)
+
+    def get_thread(self) -> Thread:
+        return self.thread
