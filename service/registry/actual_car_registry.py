@@ -35,6 +35,10 @@ class ActualCarRegistry(CarRegistry):
             raise FieldCannotBeBlankError("make")
         elif new_car.model == "":
             raise FieldCannotBeBlankError("model")
+        elif new_car.year < 0:  # year is set by the UI to -1 when it's empty
+            raise FieldCannotBeBlankError("year")
+        elif new_car.color == "":
+            raise FieldCannotBeBlankError("color")
         elif new_car.owner == "":
             raise FieldCannotBeBlankError("owner")
 

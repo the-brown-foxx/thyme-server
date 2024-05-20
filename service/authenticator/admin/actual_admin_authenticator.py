@@ -58,11 +58,8 @@ class ActualAdminAuthenticator(AdminAuthenticator):
             claim = self.token_processor.decode_token(token)
             saved_password = self.admin_password_repository.get_password()
 
-            if saved_password is None or claim['password_version'] != saved_password.version:
-                raise IncorrectPasswordError()
-
-            # TODO: Find a way to unit test this?
-            if claim['expiry'] <= datetime.now(timezone.utc).timestamp():
+            if (saved_password is None or claim['password_version'] != saved_password.version
+                    or claim['expiry'] <= datetime.now(timezone.utc).timestamp()):
                 raise InvalidTokenError()
 
         except JWTError:
