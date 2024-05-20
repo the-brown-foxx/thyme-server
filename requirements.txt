@@ -8,3 +8,4 @@ opencv-python==4.9.0.80
 reactivex==4.0.4
 easyocr==1.7.1
 ultralytics==8.2.12
+pyserial~=3.5
