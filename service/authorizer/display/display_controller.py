@@ -13,5 +13,5 @@ class DisplayController(ABC):
         pass
 
     @abstractmethod
-    def show_unauthorized_message(self):
+    def show_unauthorized_message(self, registration_id: str):
         pass

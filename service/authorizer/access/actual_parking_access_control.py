@@ -2,7 +2,7 @@ from service.authorizer.access.parking_access_control import ParkingAccessContro
 from service.authorizer.display.display_controller import DisplayController
 from service.authorizer.gate.gate_controller import GateController
 from service.authorizer.monitor.license_plate_monitor import LicensePlateMonitor
-from service.exception import CarNotAuthorizedException
+from service.exception import CarNotFoundError
 from service.registry.car_registry import CarRegistry
 
 
@@ -25,12 +25,12 @@ class ActualParkingAccessControl(ParkingAccessControl):
         self.display_controller = display_controller
 
     def on_license_plate_detected(self, registration_id: str):
-        car = self.car_registry.get_car(registration_id)
-        if car is None:
-            raise CarNotAuthorizedException(registration_id)
-
-        self.gate_controller.open_gate()
-        self.display_controller.show_car_info(car)
+        try:
+            car = self.car_registry.get_car(registration_id)
+            self.gate_controller.open_gate()
+            self.display_controller.show_car_info(car)
+        except CarNotFoundError:
+            self.display_controller.show_unauthorized_message(registration_id)
 
     def start(self):
         (self.license_plate_monitor.get_registration_id_stream()
