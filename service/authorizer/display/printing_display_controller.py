@@ -9,5 +9,5 @@ class PrintingDisplayController(DisplayController):
     def show_car_info(self, car: Car):
         print(f'Welcome, {car.color} {car.year} {car.make} {car.model} [{car.registration_id}]!')
 
-    def show_unauthorized_message(self):
-        print('Thou shall not pass!')
+    def show_unauthorized_message(self, registration_id: str):
+        print(f'Thou shall not pass, {registration_id}')
