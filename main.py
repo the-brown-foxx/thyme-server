@@ -9,7 +9,11 @@ from pydantic import BaseModel
 from service.authenticator.admin.actual_admin_authenticator import ActualAdminAuthenticator
 from service.authenticator.admin.admin_authenticator import AdminAuthenticator
 from service.authenticator.admin.repository.actual_admin_password_repository import ActualAdminPasswordRepository
+from service.authenticator.log.actual_car_logger import ActualCarLogger
+from service.authenticator.log.car_logger import CarLogger
+from service.authenticator.log.repository.actual_log_repository import ActualCarLogRepository
 from service.authenticator.token.actual_token_processor import ActualTokenProcessor
+from service.authorizer.stream.webcam_video_stream_provider import WebcamVideoStreamProvider
 from service.registry.actual_car_registry import ActualCarRegistry
 from service.registry.car_registry import CarRegistry
 from service.exception import CarNotFoundError, FieldCannotBeBlankError, PasswordTooShortError, \
@@ -24,7 +28,7 @@ admin_authenticator: AdminAuthenticator = ActualAdminAuthenticator(
 )
 
 car_registry: CarRegistry = ActualCarRegistry(ActualCarRepository())
-
+car_logger: CarLogger = ActualCarLogger(ActualCarLogRepository(), WebcamVideoStreamProvider())
 oauth_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
@@ -207,4 +211,22 @@ async def unregister_car(token: Annotated[str, Depends(oauth_scheme)], registrat
     return {
         "status": "SUCCESSFUL",
         "message": "Car unregistered successfully",
+    }
+
+
+@app.get("/logs", status_code=status.HTTP_200_OK)
+async def get_logs(token: Annotated[str, Depends(oauth_scheme)]):
+    admin_authenticator.require_authentication(token)
+    return {
+        "status": "SUCCESSFUL",
+        "logs": car_logger.get_logs(),
+    }
+
+
+@app.get("/logs/{registration_id}", status_code=status.HTTP_200_OK)
+async def get_log(token: Annotated[str, Depends(oauth_scheme)], registration_id: str):
+    admin_authenticator.require_authentication(token)
+    return {
+        "status": "SUCCESSFUL",
+        "logs": car_logger.get_logs_by_car_registration_id(registration_id),
     }
