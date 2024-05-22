@@ -13,7 +13,6 @@ from service.registry.model.car import Car
 
 class ScoringCarMonitor(CarMonitor):
     car_registry: CarRegistry
-    scoring_registration_id_filter: ScoringRegistrationIdFilter
     car_stream: Subject[Union[Car, str]]
 
     def __init__(
