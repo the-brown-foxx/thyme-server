@@ -10,3 +10,7 @@ class CarMonitor(ABC):
     @abstractmethod
     def get_car_stream(self) -> Observable[Union[Car, str]]:
         pass
+
+    @abstractmethod
+    def mark_car_as_passed(self):
+        pass

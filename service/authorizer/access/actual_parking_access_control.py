@@ -32,6 +32,8 @@ class ActualParkingAccessControl(ParkingAccessControl):
             self.gate_controller.open_gate()
             self.display_controller.show_car_info(car)
             self.car_logger.log(car_registration_id=car.registration_id, entering=True)
+            # TODO: call car_monitor.mark_car_as_passed() after the arduino has
+            #  signaled that the car has passed successfully
         elif isinstance(car_or_registration_id, str):
             registration_id = car_or_registration_id
             self.display_controller.show_unauthorized_message(registration_id)

@@ -37,3 +37,6 @@ class ScoringCarMonitor(CarMonitor):
 
     def get_car_stream(self) -> Observable[Car]:
         return self.car_stream
+
+    def mark_car_as_passed(self):
+        pass
