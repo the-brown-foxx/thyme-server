@@ -1,11 +1,10 @@
 from typing import Union
 
-from service.authenticator.log.car_logger import CarLogger
 from service.authorizer.access.parking_access_control import ParkingAccessControl
 from service.authorizer.display.display_controller import DisplayController
 from service.authorizer.gate.gate_controller import GateController
+from service.authorizer.log.car_logger import CarLogger
 from service.authorizer.monitor.car.car_monitor import CarMonitor
-from service.registry.car_registry import CarRegistry
 from service.registry.model.car import Car
 
 

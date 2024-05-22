@@ -3,9 +3,9 @@ from datetime import datetime
 
 import cv2
 
-from service.authenticator.log.car_logger import CarLogger
-from service.authenticator.log.model.car_log import CarLog
-from service.authenticator.log.repository.car_log_repository import CarLogRepository
+from service.authorizer.log.car_logger import CarLogger
+from service.authorizer.log.model.car_log import CarLog
+from service.authorizer.log.repository.car_log_repository import CarLogRepository
 from service.authorizer.stream.video_stream_provider import VideoStreamProvider
 
 

@@ -1,5 +1,5 @@
-from service.authenticator.log.actual_car_logger import ActualCarLogger
-from service.authenticator.log.repository.actual_car_log_repository import ActualCarLogRepository
+from service.authorizer.log.actual_car_logger import ActualCarLogger
+from service.authorizer.log.repository.actual_car_log_repository import ActualCarLogRepository
 from service.authorizer.access.actual_parking_access_control import ActualParkingAccessControl
 from service.authorizer.display.printing_display_controller import PrintingDisplayController
 from service.authorizer.filter.scoring_registration_id_filter import ScoringRegistrationIdFilter

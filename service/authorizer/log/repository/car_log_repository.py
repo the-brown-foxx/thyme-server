@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Optional
 
-from service.authenticator.log.model.car_log import CarLog
+from service.authorizer.log.model.car_log import CarLog
 
 
 class CarLogRepository(ABC):
