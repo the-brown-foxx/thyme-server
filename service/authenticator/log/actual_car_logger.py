@@ -15,7 +15,7 @@ class ActualCarLogger(CarLogger):
 
     def __init__(self, log_repository: CarLogRepository, video_steam_provider: VideoStreamProvider):
         self.log_repository = log_repository
-        self.video_steam_provider = video_steam_provider
+        self.video_stream_provider = video_steam_provider
 
     def get_logs(self) -> list[CarLog]:
         return self.log_repository.get_logs()

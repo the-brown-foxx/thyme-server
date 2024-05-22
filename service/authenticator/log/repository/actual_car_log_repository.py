@@ -11,6 +11,7 @@ def log_entity_to_car_log(log_entity: CarLogEntity):
         car_registration_id=log_entity.car_registration_id,
         entering=log_entity.entering,
         image=log_entity.image,
+        sus=log_entity.sus,
     )
 
 
@@ -20,6 +21,7 @@ def car_log_to_log_entity(car_log: CarLog):
         entering=car_log.entering,
         image=car_log.image,
         car_registration_id=car_log.car_registration_id,
+        sus=car_log.sus,
     )
 
 
