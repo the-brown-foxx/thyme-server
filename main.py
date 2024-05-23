@@ -9,9 +9,9 @@ from pydantic import BaseModel
 from service.authenticator.admin.actual_admin_authenticator import ActualAdminAuthenticator
 from service.authenticator.admin.admin_authenticator import AdminAuthenticator
 from service.authenticator.admin.repository.actual_admin_password_repository import ActualAdminPasswordRepository
-from service.authenticator.log.actual_car_logger import ActualCarLogger
-from service.authenticator.log.car_logger import CarLogger
-from service.authenticator.log.repository.actual_log_repository import ActualCarLogRepository
+from service.authorizer.log.actual_car_logger import ActualCarLogger
+from service.authorizer.log import CarLogger
+from service.authorizer.log.repository.actual_car_log_repository import ActualCarLogRepository
 from service.authenticator.token.actual_token_processor import ActualTokenProcessor
 from service.authorizer.stream.webcam_video_stream_provider import WebcamVideoStreamProvider
 from service.registry.actual_car_registry import ActualCarRegistry

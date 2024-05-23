@@ -1,25 +1,29 @@
 from peewee import DoesNotExist
 
-from service.authenticator.log.model.car_log import CarLog
-from service.authenticator.log.repository.car_log_repository import CarLogRepository
-from service.authenticator.log.repository.car_log_entity import CarLogEntity
+from service.authorizer.log.model.car_log import CarLog
+from service.authorizer.log.repository.car_log_repository import CarLogRepository
+from service.authorizer.log.repository.car_log_entity import CarLogEntity
 
 
 def log_entity_to_car_log(log_entity: CarLogEntity):
     return CarLog(
+        log_id=log_entity.log_id,
         date_time=log_entity.date_time,
         car_registration_id=log_entity.car_registration_id,
         entering=log_entity.entering,
         image=log_entity.image,
+        sus=log_entity.sus,
     )
 
 
 def car_log_to_log_entity(car_log: CarLog):
     return CarLogEntity(
+        log_id=car_log.log_id,
         date_time=car_log.date_time,
         entering=car_log.entering,
         image=car_log.image,
         car_registration_id=car_log.car_registration_id,
+        sus=car_log.sus,
     )
 
 
@@ -37,7 +41,7 @@ class ActualCarLogRepository(CarLogRepository):
 
     def get_logs_by_car_registration_id(self, registration_id: str) -> list[CarLog]:
         logs: list[CarLog] = []
-        log_entities = CarLogEntity.select(CarLogEntity.car_registration_id == registration_id)
+        log_entities = CarLogEntity.select().where(CarLogEntity.car_registration_id == registration_id)
 
         for car_log in log_entities:
             logs.append(log_entity_to_car_log(car_log))

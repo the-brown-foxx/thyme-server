@@ -3,9 +3,9 @@ from datetime import datetime
 
 import cv2
 
-from service.authenticator.log.car_logger import CarLogger
-from service.authenticator.log.model.car_log import CarLog
-from service.authenticator.log.repository.car_log_repository import CarLogRepository
+from service.authorizer.log.car_logger import CarLogger
+from service.authorizer.log.model.car_log import CarLog
+from service.authorizer.log.repository.car_log_repository import CarLogRepository
 from service.authorizer.stream.video_stream_provider import VideoStreamProvider
 
 
@@ -15,7 +15,7 @@ class ActualCarLogger(CarLogger):
 
     def __init__(self, log_repository: CarLogRepository, video_steam_provider: VideoStreamProvider):
         self.log_repository = log_repository
-        self.video_steam_provider = video_steam_provider
+        self.video_stream_provider = video_steam_provider
 
     def get_logs(self) -> list[CarLog]:
         return self.log_repository.get_logs()
