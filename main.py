@@ -10,7 +10,7 @@ from service.authenticator.admin.actual_admin_authenticator import ActualAdminAu
 from service.authenticator.admin.admin_authenticator import AdminAuthenticator
 from service.authenticator.admin.repository.actual_admin_password_repository import ActualAdminPasswordRepository
 from service.authorizer.log.actual_car_logger import ActualCarLogger
-from service.authorizer.log import CarLogger
+from service.authorizer.log.car_logger import CarLogger
 from service.authorizer.log.repository.actual_car_log_repository import ActualCarLogRepository
 from service.authenticator.token.actual_token_processor import ActualTokenProcessor
 from service.authorizer.stream.webcam_video_stream_provider import WebcamVideoStreamProvider
