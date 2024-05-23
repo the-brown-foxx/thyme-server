@@ -8,7 +8,7 @@ from service.authorizer.monitor.car.car_monitor import CarMonitor
 from service.registry.model.car import Car
 
 
-class ActualParkingAccessControl(ParkingAccessControl):
+class ParkingExitControl(ParkingAccessControl):
     car_monitor: CarMonitor
     gate_controller: GateController
     display_controller: DisplayController
@@ -27,16 +27,16 @@ class ActualParkingAccessControl(ParkingAccessControl):
         self.car_logger = car_logger
 
     def on_car_detected(self, car_or_registration_id: Union[Car, str]):
+        self.gate_controller.open_gate()
+        # TODO: Show goodbye or something
         if isinstance(car_or_registration_id, Car):
             car = car_or_registration_id
-            self.gate_controller.open_gate()
-            self.display_controller.show_car_info(car)
-            self.car_logger.log(car_registration_id=car.registration_id, entering=True)
-            # TODO: call car_monitor.mark_car_as_passed() after the arduino has
-            #  signaled that the car has passed successfully
+            self.car_logger.log(car_registration_id=car.registration_id, entering=False)
         elif isinstance(car_or_registration_id, str):
             registration_id = car_or_registration_id
-            self.display_controller.show_unauthorized_message(registration_id)
+            self.car_logger.log(car_registration_id=registration_id, entering=False)
+        # TODO: call car_monitor.mark_car_as_passed() after the arduino has
+        #  signaled that the car has passed successfully
 
     def start(self):
         (self.car_monitor.get_car_stream()
