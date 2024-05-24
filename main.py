@@ -3,21 +3,25 @@ from typing import Optional, Annotated
 from fastapi import FastAPI, status, Depends
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer
-
 from pydantic import BaseModel
 
 from service.authenticator.admin.actual_admin_authenticator import ActualAdminAuthenticator
 from service.authenticator.admin.admin_authenticator import AdminAuthenticator
 from service.authenticator.admin.repository.actual_admin_password_repository import ActualAdminPasswordRepository
+from service.authenticator.token.actual_token_processor import ActualTokenProcessor
 from service.authorizer.log.actual_car_logger import ActualCarLogger
 from service.authorizer.log.car_logger import CarLogger
 from service.authorizer.log.repository.actual_car_log_repository import ActualCarLogRepository
-from service.authenticator.token.actual_token_processor import ActualTokenProcessor
+from service.authorizer.parking.actual_parking_space_counter import ActualParkingSpaceCounter
+from service.authorizer.parking.parking_space_counter import ParkingSpaceCounter
+from service.authorizer.parking.repository.actual_parking_space_count_repository import \
+    ActualParkingSpaceCountRepository
 from service.authorizer.stream.webcam_video_stream_provider import WebcamVideoStreamProvider
+from service.exception import CarNotFoundError, FieldCannotBeBlankError, PasswordTooShortError, \
+    RegistrationIdTakenError, IncorrectPasswordError, InvalidTokenError, UnsetParkingSpaceError, \
+    TotalSpaceIsLessThanVacantSpaceError
 from service.registry.actual_car_registry import ActualCarRegistry
 from service.registry.car_registry import CarRegistry
-from service.exception import CarNotFoundError, FieldCannotBeBlankError, PasswordTooShortError, \
-    RegistrationIdTakenError, IncorrectPasswordError, InvalidTokenError
 from service.registry.repository.actual_car_repository import ActualCarRepository
 
 app = FastAPI()
@@ -29,6 +33,7 @@ admin_authenticator: AdminAuthenticator = ActualAdminAuthenticator(
 
 car_registry: CarRegistry = ActualCarRegistry(ActualCarRepository())
 car_logger: CarLogger = ActualCarLogger(ActualCarLogRepository(), WebcamVideoStreamProvider())
+parking_space_counter: ParkingSpaceCounter = ActualParkingSpaceCounter(ActualParkingSpaceCountRepository())
 oauth_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
@@ -99,6 +104,28 @@ async def invalid_token_exception_handler(_, exception: InvalidTokenError):
             "status": "INVALID_TOKEN",
             "message": exception.message,
         },
+    )
+
+
+@app.exception_handler(UnsetParkingSpaceError)
+async def internal_server_error_handler(_, exception: Exception):
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "status": "UNSET_PARKING_SPACE",
+            "message": str(exception),
+        },
+    )
+
+
+@app.exception_handler(TotalSpaceIsLessThanVacantSpaceError)
+async def internal_server_error_handler(_, exception: Exception):
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={
+            "status": "TOTAL_SPACE_SHOULD_BE_GREATER_THAN_VACANT_SPACE",
+            "message": str(exception),
+        }
     )
 
 
@@ -229,4 +256,31 @@ async def get_log(token: Annotated[str, Depends(oauth_scheme)], registration_id:
     return {
         "status": "SUCCESSFUL",
         "logs": car_logger.get_logs_by_car_registration_id(registration_id),
+    }
+
+
+class ParkingSpaceCount(BaseModel):
+    total_space: int
+    vacant_space: int
+
+
+@app.get("/parking", status_code=status.HTTP_200_OK)
+async def get_parking_space_count(token: Annotated[str, Depends(oauth_scheme)]):
+    admin_authenticator.require_authentication(token)
+    parking_space_count = parking_space_counter.get_parking_space_count()
+
+    return {
+        "status": "SUCCESSFUL",
+        "total_space": parking_space_count.total_space,
+        "vacant_space": parking_space_count.vacant_space,
+    }
+
+
+@app.post("/parking", status_code=status.HTTP_200_OK)
+async def set_parking_space_count(token: Annotated[str, Depends(oauth_scheme)], parking_space_count: ParkingSpaceCount):
+    admin_authenticator.require_authentication(token)
+    parking_space_counter.set_parking_space_count(parking_space_count)
+    return {
+        "status": "SUCCESSFUL",
+        "message": "Parking space count set successfully",
     }

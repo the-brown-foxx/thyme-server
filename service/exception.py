@@ -68,10 +68,23 @@ class InvalidTokenError(Exception):
         return self.message
 
 
-class CarNotAuthorizedException(Exception):
+class UnsetParkingSpaceError(Exception):
     message: str
-    registration_id: str
 
-    def __init__(self, registration_id: str):
-        self.registration_id = registration_id
-        self.message = f"Car with registration ID {registration_id} is not authorized"
+    def __init__(self):
+        self.message = "Unset parking space"
+
+    def __str__(self):
+        return self.message
+
+
+class TotalSpaceIsLessThanVacantSpaceError(Exception):
+    message: str
+
+    def __init__(self):
+        self.message = "Total space should be greater than vacant space"
+
+    def __str__(self):
+        return self.message
+
+
