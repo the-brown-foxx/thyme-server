@@ -19,7 +19,6 @@ class ActualParkingSpaceCountRepository(ParkingSpaceCountRepository):
 
     def upsert(self, parking_space_count: ParkingSpaceCount):
         try:
-
             old_parking_space_count_entity: ParkingSpaceCountEntity = ParkingSpaceCountEntity.get()
             old_parking_space_count_entity.total_space = parking_space_count.total_space
             old_parking_space_count_entity.vacant_space = parking_space_count.vacant_space
