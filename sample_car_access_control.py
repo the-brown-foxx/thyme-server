@@ -1,4 +1,4 @@
-from service.authorizer.access.actual_parking_access_control import ActualParkingAccessControl
+from service.authorizer.access.parking_entrance_control import ParkingEntranceControl
 from service.authorizer.display.printing_display_controller import PrintingDisplayController
 from service.authorizer.filter.scoring_registration_id_filter import ScoringRegistrationIdFilter
 from service.authorizer.format.any_registration_id_format import AnyRegistrationIdFormat
@@ -23,7 +23,7 @@ gate_controller = PrintingGateController()
 display_controller = PrintingDisplayController()
 log_repository = ActualCarLogRepository()
 car_logger = ActualCarLogger(log_repository, video_stream_provider)
-parking_access_control = ActualParkingAccessControl(
+parking_access_control = ParkingEntranceControl(
     car_monitor,
     gate_controller,
     display_controller,
