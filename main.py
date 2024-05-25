@@ -110,7 +110,7 @@ async def invalid_token_exception_handler(_, exception: InvalidTokenError):
 @app.exception_handler(UnsetParkingSpaceError)
 async def unset_parking_space_exception_handler(_, exception: Exception):
     return JSONResponse(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        status_code=status.HTTP_404_NOT_FOUND,
         content={
             "status": "UNSET_PARKING_SPACE",
             "message": str(exception),
@@ -121,9 +121,9 @@ async def unset_parking_space_exception_handler(_, exception: Exception):
 @app.exception_handler(TotalSpaceIsLessThanVacantSpaceError)
 async def total_space_less_than_vacant_space_exception_handler(_, exception: Exception):
     return JSONResponse(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        status_code=status.HTTP_400_BAD_REQUEST,
         content={
-            "status": "TOTAL_SPACE_SHOULD_BE_GREATER_THAN_VACANT_SPACE",
+            "status": "TOTAL_SPACE_LESS_THAN_VACANT_SPACE",
             "message": str(exception),
         }
     )
