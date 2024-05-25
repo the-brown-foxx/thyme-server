@@ -8,6 +8,7 @@ from service.authorizer.parking.repository.parking_space_count_repository import
 from service.authorizer.parking.repository.parking_space_count_entity import ParkingSpaceCountEntity
 from service.exception import UnsetParkingSpaceError
 
+
 class ActualParkingSpaceCountRepository(ParkingSpaceCountRepository):
     ParkingSpaceCountEntity.create_table(safe=True)
 
@@ -28,4 +29,3 @@ class ActualParkingSpaceCountRepository(ParkingSpaceCountRepository):
                 total_space=parking_space_count.total_space,
                 vacant_space=parking_space_count.vacant_space,
             ).save()
-
