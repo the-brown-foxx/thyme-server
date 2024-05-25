@@ -284,3 +284,11 @@ async def set_parking_space_count(token: Annotated[str, Depends(oauth_scheme)], 
         "status": "SUCCESSFUL",
         "message": "Parking space count set successfully",
     }
+
+
+@app.get("/parking/parking-space-set", status_code=status.HTTP_200_OK)
+async def parking_space_set():
+    return {
+        "status": "SUCCESSFUL",
+        "parking_space_set": parking_space_counter.parking_space_set(),
+    }

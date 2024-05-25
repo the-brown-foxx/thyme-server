@@ -13,6 +13,10 @@ class ParkingSpaceCounter(ABC):
         pass
 
     @abstractmethod
+    def parking_space_set(self) -> bool:
+        pass
+
+    @abstractmethod
     def increment_available_space(self):
         pass
 

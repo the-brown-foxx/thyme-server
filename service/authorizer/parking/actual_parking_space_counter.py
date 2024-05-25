@@ -32,6 +32,9 @@ class ActualParkingSpaceCounter(ParkingSpaceCounter):
         )
         self.parking_space_repository.upsert(parking_counter)
 
+    def parking_space_set(self) -> bool:
+        return self.parking_space_repository.get_parking_space_count() is not None
+
     def increment_available_space(self):
         old_parking_space_count = self.get_parking_space_count()
         new_parking_space_count = replace(
