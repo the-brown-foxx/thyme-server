@@ -1,5 +1,8 @@
+import serial
+import time
+import threading
+from queue import Queue, Empty
 from typing import Union
-
 from service.authorizer.access.parking_access_control import ParkingAccessControl
 from service.authorizer.display.display_controller import DisplayController
 from service.authorizer.gate.gate_controller import GateController
@@ -34,16 +37,21 @@ class ParkingEntranceControl(ParkingAccessControl):
         if isinstance(car_or_registration_id, Car):
             car = car_or_registration_id
             self.parking_space_counter.decrement_available_space()
-            self.gate_controller.open_gate()
             self.display_controller.show_car_info(car)
             vacant_space = self.parking_space_counter.get_parking_space_count().vacant_space
             self.display_controller.update_vacant_space(vacant_space)
             self.car_logger.log(car_registration_id=car.registration_id, entering=True)
-            # TODO: call car_monitor.mark_car_as_passed() after the arduino has
-            #  signaled that the car has passed successfully
+
+            vehicle_passed = self.gate_controller.open_gate()
+            vehicle_passed.subscribe(on_next=lambda passed: self.vehicle_passed_on_next(passed))
+
         elif isinstance(car_or_registration_id, str):
             registration_id = car_or_registration_id
             self.display_controller.show_unauthorized_message(registration_id)
+
+    def vehicle_passed_on_next(self, passed: bool):
+        if passed:
+            self.car_monitor.mark_car_as_passed()
 
     def start(self):
         (self.car_monitor.get_car_stream()
