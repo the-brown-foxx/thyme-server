@@ -14,7 +14,11 @@ class ActualParkingSpaceCountRepository(ParkingSpaceCountRepository):
 
     def get_parking_space_count(self) -> Optional[ParkingSpaceCount]:
         try:
-            return ParkingSpaceCountEntity.get()
+            parking_space_count = ParkingSpaceCountEntity.get()
+            return ParkingSpaceCount(
+                total_space=parking_space_count.total_space,
+                vacant_space=parking_space_count.vacant_space,
+            )
         except DoesNotExist:
             return None
 
