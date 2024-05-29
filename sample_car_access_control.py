@@ -23,9 +23,6 @@ from service.registry.actual_car_registry import ActualCarRegistry
 from service.registry.model.car import Car
 from service.registry.repository.actual_car_repository import ActualCarRepository
 
-import nest_asyncio
-
-nest_asyncio.apply()
 
 video_stream_provider = WebcamVideoStreamProvider()
 registration_id_format = AnyRegistrationIdFormat()
@@ -35,7 +32,7 @@ car_repository = ActualCarRepository()
 car_registry = ActualCarRegistry(car_repository)
 registration_id_format = AnyRegistrationIdFormat()
 car_monitor = InstantCheckingCarMonitor(license_plate_monitor, car_registry, registration_id_format)
-gate_controller = SerialGateController('COM9')
+gate_controller = SerialGateController('COM5')
 display_controller_subject = BehaviorSubject[DisplayControllerEvent](None)
 parking_space_counter = ActualParkingSpaceCounter(ActualParkingSpaceCountRepository())
 display_controller = SubjectDisplayController(display_controller_subject, parking_space_counter)
