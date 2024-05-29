@@ -12,6 +12,9 @@ from service.authorizer.log.actual_car_logger import ActualCarLogger
 from service.authorizer.log.repository.actual_car_log_repository import ActualCarLogRepository
 from service.authorizer.monitor.car.instant_checking_car_monitor import InstantCheckingCarMonitor
 from service.authorizer.monitor.license.actual_license_plate_monitor import ActualLicensePlateMonitor
+from service.authorizer.parking.actual_parking_space_counter import ActualParkingSpaceCounter
+from service.authorizer.parking.repository.actual_parking_space_count_repository import \
+    ActualParkingSpaceCountRepository
 from service.authorizer.stream.webcam_video_stream_provider import WebcamVideoStreamProvider
 from service.connection.web_socket_connection_manager import WebSocketConnectionManager
 from service.registry.actual_car_registry import ActualCarRegistry
@@ -31,10 +34,12 @@ display_controller_subject = Subject[DisplayControllerEvent]()
 display_controller = SubjectDisplayController(display_controller_subject)
 log_repository = ActualCarLogRepository()
 car_logger = ActualCarLogger(log_repository, video_stream_provider)
+parking_space_counter = ActualParkingSpaceCounter(ActualParkingSpaceCountRepository())
 parking_access_control = ParkingEntranceControl(
     car_monitor,
     gate_controller,
     display_controller,
+    parking_space_counter,
     car_logger,
 )
 
@@ -53,6 +58,11 @@ async def display_web_socket(web_socket: WebSocket):
             await connection_manager.send_message({
                 'status': 'IDLE',
                 'event': 'Waiting for a car to pass',
+            })
+        elif isinstance(event, int):
+            await connection_manager.send_message({
+                'status': 'VACANT_SPACE_UPDATE',
+                'vacant_space': event,
             })
         elif isinstance(event, Car):
             # The serializer is not working for some reason. 😁

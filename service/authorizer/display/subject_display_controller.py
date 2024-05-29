@@ -4,7 +4,7 @@ from service.authorizer.display.display_controller import DisplayController
 from service.registry.model.car import Car
 
 
-DisplayControllerEvent = None | Car | str
+DisplayControllerEvent = None | Car | str | int
 
 
 class SubjectDisplayController(DisplayController):
@@ -12,6 +12,9 @@ class SubjectDisplayController(DisplayController):
 
     def __init__(self, subject):
         self.subject = subject
+
+    def update_vacant_space(self, vacant_space: int):
+        self.subject.on_next(vacant_space)
 
     def show_instructions(self):
         self.subject.on_next(None)
