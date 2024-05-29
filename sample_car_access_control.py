@@ -2,6 +2,7 @@ import asyncio
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from reactivex import Subject
+from reactivex.subject import BehaviorSubject
 
 from service.authorizer.access.parking_entrance_control import ParkingEntranceControl
 from service.authorizer.display.subject_display_controller import SubjectDisplayController, DisplayControllerEvent
@@ -21,6 +22,10 @@ from service.registry.actual_car_registry import ActualCarRegistry
 from service.registry.model.car import Car
 from service.registry.repository.actual_car_repository import ActualCarRepository
 
+import nest_asyncio
+
+nest_asyncio.apply()
+
 video_stream_provider = WebcamVideoStreamProvider()
 registration_id_format = AnyRegistrationIdFormat()
 registration_id_filter = ScoringRegistrationIdFilter(registration_id_format)
@@ -30,11 +35,11 @@ car_registry = ActualCarRegistry(car_repository)
 registration_id_format = AnyRegistrationIdFormat()
 car_monitor = InstantCheckingCarMonitor(license_plate_monitor, car_registry, registration_id_format)
 gate_controller = PrintingGateController()
-display_controller_subject = Subject[DisplayControllerEvent]()
-display_controller = SubjectDisplayController(display_controller_subject)
+display_controller_subject = BehaviorSubject[DisplayControllerEvent](None)
+parking_space_counter = ActualParkingSpaceCounter(ActualParkingSpaceCountRepository())
+display_controller = SubjectDisplayController(display_controller_subject, parking_space_counter)
 log_repository = ActualCarLogRepository()
 car_logger = ActualCarLogger(log_repository, video_stream_provider)
-parking_space_counter = ActualParkingSpaceCounter(ActualParkingSpaceCountRepository())
 parking_access_control = ParkingEntranceControl(
     car_monitor,
     gate_controller,
@@ -52,6 +57,12 @@ app = FastAPI()
 async def display_web_socket(web_socket: WebSocket):
     connection_manager = WebSocketConnectionManager(web_socket)
     await connection_manager.connect()
+
+    vacant_space = parking_space_counter.get_parking_space_count().vacant_space
+    await connection_manager.send_message({
+        'status': 'VACANT_SPACE_UPDATE',
+        'vacant_space': vacant_space,
+    })
 
     async def async_on_next(event: DisplayControllerEvent):
         if event is None:
