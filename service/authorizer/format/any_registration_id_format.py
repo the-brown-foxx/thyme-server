@@ -2,11 +2,11 @@ from service.authorizer.format.registration_id_format import RegistrationIdForma
 
 
 class AnyRegistrationIdFormat(RegistrationIdFormat):
-    def preformat(self, registration_id: str):
+    def preformat(self, registration_id: str) -> str:
         return (registration_id
                 .replace(' ', '')
                 .replace('.', '')
                 .replace('*', ''))
 
-    def valid(self, registration_id: str):
+    def valid(self, registration_id: str) -> bool:
         return True

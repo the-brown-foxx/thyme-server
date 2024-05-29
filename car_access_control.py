@@ -8,6 +8,7 @@ from service.authorizer.access.parking_exit_control import ParkingExitControl
 from service.authorizer.display.subject_display_controller import SubjectDisplayController, DisplayControllerEvent
 from service.authorizer.filter.scoring_registration_id_filter import ScoringRegistrationIdFilter
 from service.authorizer.format.any_registration_id_format import AnyRegistrationIdFormat
+from service.authorizer.format.philippine_registration_id_format import PhilippineRegistrationIdFormat
 from service.authorizer.gate.printing_gate_controller import PrintingGateController
 from service.authorizer.gate.serial_gate_controller import SerialGateController
 from service.authorizer.log.actual_car_logger import ActualCarLogger
@@ -27,13 +28,12 @@ registration_id_format = AnyRegistrationIdFormat()
 registration_id_filter = ScoringRegistrationIdFilter(registration_id_format)
 car_repository = ActualCarRepository()
 car_registry = ActualCarRegistry(car_repository)
-registration_id_format = AnyRegistrationIdFormat()
 display_controller_subject = Subject[DisplayControllerEvent]()
 parking_space_counter = ActualParkingSpaceCounter(ActualParkingSpaceCountRepository())
 display_controller = SubjectDisplayController(display_controller_subject, parking_space_counter)
 log_repository = ActualCarLogRepository()
 
-entrance_video_stream_provider = SourceVideoStreamProvider(0)
+entrance_video_stream_provider = SourceVideoStreamProvider(1)
 entrance_license_plate_monitor = ActualLicensePlateMonitor(entrance_video_stream_provider, headless=False)
 entrance_car_monitor = InstantCheckingCarMonitor(entrance_license_plate_monitor, car_registry, registration_id_format)
 # entrance_gate_controller = SerialGateController(entrance=True, serial_port='COM5')
@@ -49,7 +49,7 @@ parking_entrance_control = ParkingEntranceControl(
 
 parking_entrance_control.start()
 
-exit_video_stream_provider = SourceVideoStreamProvider('480p.mp4')
+exit_video_stream_provider = SourceVideoStreamProvider(0)
 exit_license_plate_monitor = ActualLicensePlateMonitor(exit_video_stream_provider, headless=True)
 exit_car_monitor = InstantCheckingCarMonitor(exit_license_plate_monitor, car_registry, registration_id_format)
 # entrance_gate_controller = SerialGateController(entrance=False, serial_port='COM5')
