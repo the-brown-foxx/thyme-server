@@ -49,7 +49,7 @@ class ActualCarRepository(CarRepository):
 
     def get_cars(self) -> list[Car]:
         cars: list[Car] = []
-        car_entities = CarEntity.select()
+        car_entities = CarEntity.select().order_by(CarEntity.registration_id)
 
         for car_entity in car_entities:
             cars.append(car_entity_to_car(car_entity))

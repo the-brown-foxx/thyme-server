@@ -32,7 +32,7 @@ class ActualCarLogRepository(CarLogRepository):
 
     def get_logs(self) -> list[CarLog]:
         logs: list[CarLog] = []
-        car_logs = CarLogEntity.select()
+        car_logs = CarLogEntity.select().order_by(CarLogEntity.date_time.desc())
 
         for car_log in car_logs:
             logs.append(log_entity_to_car_log(car_log))
@@ -41,7 +41,8 @@ class ActualCarLogRepository(CarLogRepository):
 
     def get_logs_by_car_registration_id(self, registration_id: str) -> list[CarLog]:
         logs: list[CarLog] = []
-        log_entities = CarLogEntity.select().where(CarLogEntity.car_registration_id == registration_id)
+        log_entities = (CarLogEntity.select().where(CarLogEntity.car_registration_id == registration_id)
+                        .order_by(CarLogEntity.date_time.desc()))
 
         for car_log in log_entities:
             logs.append(log_entity_to_car_log(car_log))
