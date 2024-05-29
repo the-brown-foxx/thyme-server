@@ -1,8 +1,5 @@
-import serial
-import time
-import threading
-from queue import Queue, Empty
 from typing import Union
+
 from service.authorizer.access.parking_access_control import ParkingAccessControl
 from service.authorizer.display.display_controller import DisplayController
 from service.authorizer.gate.gate_controller import GateController
@@ -52,6 +49,7 @@ class ParkingEntranceControl(ParkingAccessControl):
     def vehicle_passed_on_next(self, passed: bool):
         if passed:
             self.car_monitor.mark_car_as_passed()
+            self.display_controller.show_instructions()
 
     def start(self):
         (self.car_monitor.get_car_stream()
