@@ -2,13 +2,11 @@ import asyncio
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from reactivex import Subject
-from reactivex.subject import BehaviorSubject
 
 from service.authorizer.access.parking_entrance_control import ParkingEntranceControl
 from service.authorizer.display.subject_display_controller import SubjectDisplayController, DisplayControllerEvent
 from service.authorizer.filter.scoring_registration_id_filter import ScoringRegistrationIdFilter
 from service.authorizer.format.any_registration_id_format import AnyRegistrationIdFormat
-from service.authorizer.gate.printing_gate_controller import PrintingGateController
 from service.authorizer.gate.serial_gate_controller import SerialGateController
 from service.authorizer.log.actual_car_logger import ActualCarLogger
 from service.authorizer.log.repository.actual_car_log_repository import ActualCarLogRepository
@@ -23,7 +21,6 @@ from service.registry.actual_car_registry import ActualCarRegistry
 from service.registry.model.car import Car
 from service.registry.repository.actual_car_repository import ActualCarRepository
 
-
 video_stream_provider = WebcamVideoStreamProvider()
 registration_id_format = AnyRegistrationIdFormat()
 registration_id_filter = ScoringRegistrationIdFilter(registration_id_format)
@@ -33,7 +30,8 @@ car_registry = ActualCarRegistry(car_repository)
 registration_id_format = AnyRegistrationIdFormat()
 car_monitor = InstantCheckingCarMonitor(license_plate_monitor, car_registry, registration_id_format)
 gate_controller = SerialGateController('COM5')
-display_controller_subject = BehaviorSubject[DisplayControllerEvent](None)
+# gate_controller = PrintingGateController()
+display_controller_subject = Subject[DisplayControllerEvent]()
 parking_space_counter = ActualParkingSpaceCounter(ActualParkingSpaceCountRepository())
 display_controller = SubjectDisplayController(display_controller_subject, parking_space_counter)
 log_repository = ActualCarLogRepository()
