@@ -1,12 +1,9 @@
 import asyncio
 
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from reactivex import Subject
-from starlette.websockets import WebSocket
 
 from service.authorizer.access.parking_entrance_control import ParkingEntranceControl
-from service.authorizer.display.connected_display_controller import ConnectedDisplayController
-from service.authorizer.display.printing_display_controller import PrintingDisplayController
 from service.authorizer.display.subject_display_controller import SubjectDisplayController, DisplayControllerEvent
 from service.authorizer.filter.scoring_registration_id_filter import ScoringRegistrationIdFilter
 from service.authorizer.format.any_registration_id_format import AnyRegistrationIdFormat
@@ -15,7 +12,6 @@ from service.authorizer.log.actual_car_logger import ActualCarLogger
 from service.authorizer.log.repository.actual_car_log_repository import ActualCarLogRepository
 from service.authorizer.monitor.car.instant_checking_car_monitor import InstantCheckingCarMonitor
 from service.authorizer.monitor.license.actual_license_plate_monitor import ActualLicensePlateMonitor
-from service.authorizer.stream.dummy_video_stream_provider import DummyVideoStreamProvider
 from service.authorizer.stream.webcam_video_stream_provider import WebcamVideoStreamProvider
 from service.connection.web_socket_connection_manager import WebSocketConnectionManager
 from service.registry.actual_car_registry import ActualCarRegistry
@@ -61,7 +57,7 @@ async def display_web_socket(web_socket: WebSocket):
         elif isinstance(event, Car):
             # The serializer is not working for some reason. 😁
             await connection_manager.send_message({
-                'status': 'CAR_DETECTED',
+                'status': 'CAR_AUTHORIZED',
                 'car': {
                     'registration_id': event.registration_id,
                     'make': event.make,
@@ -73,7 +69,7 @@ async def display_web_socket(web_socket: WebSocket):
             })
         elif isinstance(event, str):
             await connection_manager.send_message({
-                'status': 'ERROR',
+                'status': 'CAR_UNAUTHORIZED',
                 'registration_id': event,
             })
 
@@ -85,7 +81,10 @@ async def display_web_socket(web_socket: WebSocket):
 
     display_controller_subject.subscribe(on_next)
 
-    while True:
-        await web_socket.receive_text()
+    try:
+        while True:
+            await web_socket.receive_text()
+    except WebSocketDisconnect:
+        await connection_manager.disconnect()
 
 # license_plate_monitor.get_thread().join()
