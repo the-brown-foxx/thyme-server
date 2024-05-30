@@ -6,6 +6,7 @@ from service.authorizer.gate.gate_controller import GateController
 from service.authorizer.log.car_logger import CarLogger
 from service.authorizer.monitor.car.car_monitor import CarMonitor
 from service.authorizer.parking.parking_space_counter import ParkingSpaceCounter
+from service.exception import UnsetParkingSpaceError
 from service.registry.model.car import Car
 
 
@@ -54,8 +55,13 @@ class ParkingEntranceControl(ParkingAccessControl):
     def start(self):
         (self.car_monitor.get_car_stream()
          .subscribe(lambda registration_id: self.on_car_detected(registration_id)))
-        vacant_space = self.parking_space_counter.get_parking_space_count().vacant_space
-        self.display_controller.update_vacant_space(vacant_space)
+
+        try:
+            vacant_space = self.parking_space_counter.get_parking_space_count().vacant_space
+            self.display_controller.update_vacant_space(vacant_space)
+
+        except UnsetParkingSpaceError:
+            pass
 
     def stop(self):
         pass

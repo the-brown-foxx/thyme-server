@@ -2,6 +2,7 @@ from reactivex import Subject
 
 from service.authorizer.display.display_controller import DisplayController
 from service.authorizer.parking.parking_space_counter import ParkingSpaceCounter
+from service.exception import UnsetParkingSpaceError
 from service.registry.model.car import Car
 
 DisplayControllerEvent = None | Car | str | int
@@ -16,8 +17,13 @@ class SubjectDisplayController(DisplayController):
             parking_space_counter: ParkingSpaceCounter,
     ):
         self.subject = subject
-        vacant_space = parking_space_counter.get_parking_space_count().vacant_space
-        self.update_vacant_space(vacant_space)
+
+        try:
+            vacant_space = parking_space_counter.get_parking_space_count().vacant_space
+            self.update_vacant_space(vacant_space)
+
+        except UnsetParkingSpaceError:
+            pass
 
     def update_vacant_space(self, vacant_space: int):
         self.subject.on_next(vacant_space)

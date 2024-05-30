@@ -18,17 +18,11 @@ class SerialGateController(GateController):
 
     def __init__(
             self,
+            serial: Serial,
             entrance: bool,
-            serial_port: str = 'COM5',
-            baud_rate: int = 9600,
-            timeout: int = 1,
     ):
+        self.serial = serial
         self.entrance = entrance
-        self.serial_port = serial_port
-        self.baud_rate = baud_rate
-        self.timeout = timeout
-        self.serial = Serial(serial_port, baud_rate, timeout=timeout)
-
         self.running = True
         self.command_queue = Queue()
         self.response_queue = Queue()
