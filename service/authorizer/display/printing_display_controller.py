@@ -11,3 +11,6 @@ class PrintingDisplayController(DisplayController):
 
     def show_unauthorized_message(self, registration_id: str):
         print(f'Thou shall not pass, {registration_id}')
+
+    def update_vacant_space(self, vacant_space: int):
+        print(f'Updated vacant space to {vacant_space}')

@@ -2,7 +2,6 @@ from dataclasses import replace
 
 from service.authorizer.parking.model.parking_space_count import ParkingSpaceCount
 from service.authorizer.parking.parking_space_counter import ParkingSpaceCounter
-from service.authorizer.parking.repository.parking_space_count_entity import ParkingSpaceCountEntity
 from service.authorizer.parking.repository.parking_space_count_repository import ParkingSpaceCountRepository
 from service.exception import UnsetParkingSpaceError, TotalSpaceIsLessThanVacantSpaceError, FieldCannotBeBlankError
 

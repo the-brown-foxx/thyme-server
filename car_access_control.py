@@ -9,8 +9,6 @@ from service.authorizer.access.parking_exit_control import ParkingExitControl
 from service.authorizer.display.subject_display_controller import SubjectDisplayController, DisplayControllerEvent
 from service.authorizer.filter.scoring_registration_id_filter import ScoringRegistrationIdFilter
 from service.authorizer.format.any_registration_id_format import AnyRegistrationIdFormat
-from service.authorizer.format.philippine_registration_id_format import PhilippineRegistrationIdFormat
-from service.authorizer.gate.printing_gate_controller import PrintingGateController
 from service.authorizer.gate.serial_gate_controller import SerialGateController
 from service.authorizer.log.actual_car_logger import ActualCarLogger
 from service.authorizer.log.repository.actual_car_log_repository import ActualCarLogRepository

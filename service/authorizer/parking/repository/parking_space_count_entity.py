@@ -2,6 +2,7 @@ from peewee import Model, IntegerField
 
 from database.postgres import postgres_db
 
+
 class ParkingSpaceCountEntity(Model):
     total_space = IntegerField()
     vacant_space = IntegerField()
