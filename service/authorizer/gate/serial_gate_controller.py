@@ -10,6 +10,7 @@ from service.authorizer.gate.gate_controller import GateController
 
 
 class SerialGateController(GateController):
+    entrance: bool
     serial_port: str
     baud_rate: int
     timeout: int
@@ -17,15 +18,11 @@ class SerialGateController(GateController):
 
     def __init__(
             self,
-            serial_port: str = 'COM5',
-            baud_rate: int = 9600,
-            timeout: int = 1,
+            serial: Serial,
+            entrance: bool,
     ):
-        self.serial_port = serial_port
-        self.baud_rate = baud_rate
-        self.timeout = timeout
-        self.serial = Serial(serial_port, baud_rate, timeout=timeout)
-
+        self.serial = serial
+        self.entrance = entrance
         self.running = True
         self.command_queue = Queue()
         self.response_queue = Queue()
@@ -59,7 +56,7 @@ class SerialGateController(GateController):
             return None
 
     def open_gate(self) -> Observable[bool]:
-        self.send_command('Entrance Gate Open')
+        self.send_command(f'{'Entrance' if self.entrance else 'Exit'} Gate Open')
         vehicle_passed = Subject[bool]()
         thread = Thread(target=self.observe_vehicle_passed, args=(vehicle_passed,))
         thread.daemon = True
@@ -69,7 +66,7 @@ class SerialGateController(GateController):
     def observe_vehicle_passed(self, subject: Subject[bool]):
         while self.running:
             response = self.read_response()
-            if response == "Car Entered":
+            if response == f'Car {'Entered' if self.entrance else 'Exited'}':
                 subject.on_next(True)
                 break
 

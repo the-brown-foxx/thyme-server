@@ -7,11 +7,11 @@ from database.postgres import postgres_db
 
 class CarLogEntity(Model):
     log_id = AutoField(primary_key=True)
-    date_time: datetime = DateTimeField()
-    car_registration_id: str = TextField()
-    entering: bool = BooleanField()
-    image: str = TextField()
-    sus: bool = BooleanField()
+    date_time = DateTimeField()
+    car_registration_id = TextField()
+    entering = BooleanField()
+    image = TextField()
+    sus = BooleanField()
 
     class Meta:
         database = postgres_db

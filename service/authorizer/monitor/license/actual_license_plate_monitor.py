@@ -1,3 +1,4 @@
+import random
 from threading import Thread
 from typing import Optional
 
@@ -33,6 +34,7 @@ class ActualLicensePlateMonitor(LicensePlateMonitor):
             video_stream_provider: VideoStreamProvider,
             headless: bool = True,
     ):
+        self.id = random.randint(1, 99999999)
         self.video_stream_provider = video_stream_provider
         self.registration_id_stream = Subject()
 
@@ -82,7 +84,7 @@ class ActualLicensePlateMonitor(LicensePlateMonitor):
                     # print(registration_id)
 
             if not headless:
-                cv2.imshow("YOLOv8 Inference", frame)
+                cv2.imshow(f"YOLOv8 Inference {self.id}", frame)
 
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break

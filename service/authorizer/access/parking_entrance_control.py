@@ -1,14 +1,12 @@
-import serial
-import time
-import threading
-from queue import Queue, Empty
 from typing import Union
+
 from service.authorizer.access.parking_access_control import ParkingAccessControl
 from service.authorizer.display.display_controller import DisplayController
 from service.authorizer.gate.gate_controller import GateController
 from service.authorizer.log.car_logger import CarLogger
 from service.authorizer.monitor.car.car_monitor import CarMonitor
 from service.authorizer.parking.parking_space_counter import ParkingSpaceCounter
+from service.exception import UnsetParkingSpaceError
 from service.registry.model.car import Car
 
 
@@ -52,12 +50,18 @@ class ParkingEntranceControl(ParkingAccessControl):
     def vehicle_passed_on_next(self, passed: bool):
         if passed:
             self.car_monitor.mark_car_as_passed()
+            self.display_controller.show_instructions()
 
     def start(self):
         (self.car_monitor.get_car_stream()
          .subscribe(lambda registration_id: self.on_car_detected(registration_id)))
-        vacant_space = self.parking_space_counter.get_parking_space_count().vacant_space
-        self.display_controller.update_vacant_space(vacant_space)
+
+        try:
+            vacant_space = self.parking_space_counter.get_parking_space_count().vacant_space
+            self.display_controller.update_vacant_space(vacant_space)
+
+        except UnsetParkingSpaceError:
+            pass
 
     def stop(self):
         pass

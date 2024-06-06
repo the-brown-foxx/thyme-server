@@ -1,8 +1,6 @@
 from dataclasses import replace
 from datetime import datetime
 
-import cv2
-
 from service.authorizer.log.car_logger import CarLogger
 from service.authorizer.log.model.car_log import CarLog
 from service.authorizer.log.repository.car_log_repository import CarLogRepository

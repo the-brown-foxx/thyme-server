@@ -16,7 +16,7 @@ from service.authorizer.parking.actual_parking_space_counter import ActualParkin
 from service.authorizer.parking.parking_space_counter import ParkingSpaceCounter
 from service.authorizer.parking.repository.actual_parking_space_count_repository import \
     ActualParkingSpaceCountRepository
-from service.authorizer.stream.webcam_video_stream_provider import WebcamVideoStreamProvider
+from service.authorizer.stream.webcam_video_stream_provider import SourceVideoStreamProvider
 from service.exception import CarNotFoundError, FieldCannotBeBlankError, PasswordTooShortError, \
     RegistrationIdTakenError, IncorrectPasswordError, InvalidTokenError, UnsetParkingSpaceError, \
     TotalSpaceIsLessThanVacantSpaceError
@@ -32,7 +32,7 @@ admin_authenticator: AdminAuthenticator = ActualAdminAuthenticator(
 )
 
 car_registry: CarRegistry = ActualCarRegistry(ActualCarRepository())
-car_logger: CarLogger = ActualCarLogger(ActualCarLogRepository(), WebcamVideoStreamProvider())
+car_logger: CarLogger = ActualCarLogger(ActualCarLogRepository(), SourceVideoStreamProvider(0))
 parking_space_counter: ParkingSpaceCounter = ActualParkingSpaceCounter(ActualParkingSpaceCountRepository())
 oauth_scheme = OAuth2PasswordBearer(tokenUrl="token")
 

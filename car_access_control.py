@@ -2,13 +2,13 @@ import asyncio
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from reactivex import Subject
-from reactivex.subject import BehaviorSubject
+from serial import Serial
 
 from service.authorizer.access.parking_entrance_control import ParkingEntranceControl
+from service.authorizer.access.parking_exit_control import ParkingExitControl
 from service.authorizer.display.subject_display_controller import SubjectDisplayController, DisplayControllerEvent
 from service.authorizer.filter.scoring_registration_id_filter import ScoringRegistrationIdFilter
 from service.authorizer.format.any_registration_id_format import AnyRegistrationIdFormat
-from service.authorizer.gate.printing_gate_controller import PrintingGateController
 from service.authorizer.gate.serial_gate_controller import SerialGateController
 from service.authorizer.log.actual_car_logger import ActualCarLogger
 from service.authorizer.log.repository.actual_car_log_repository import ActualCarLogRepository
@@ -17,36 +17,54 @@ from service.authorizer.monitor.license.actual_license_plate_monitor import Actu
 from service.authorizer.parking.actual_parking_space_counter import ActualParkingSpaceCounter
 from service.authorizer.parking.repository.actual_parking_space_count_repository import \
     ActualParkingSpaceCountRepository
-from service.authorizer.stream.webcam_video_stream_provider import WebcamVideoStreamProvider
+from service.authorizer.stream.webcam_video_stream_provider import SourceVideoStreamProvider
 from service.connection.web_socket_connection_manager import WebSocketConnectionManager
 from service.registry.actual_car_registry import ActualCarRegistry
 from service.registry.model.car import Car
 from service.registry.repository.actual_car_repository import ActualCarRepository
 
-
-video_stream_provider = WebcamVideoStreamProvider()
 registration_id_format = AnyRegistrationIdFormat()
 registration_id_filter = ScoringRegistrationIdFilter(registration_id_format)
-license_plate_monitor = ActualLicensePlateMonitor(video_stream_provider, headless=False)
 car_repository = ActualCarRepository()
 car_registry = ActualCarRegistry(car_repository)
-registration_id_format = AnyRegistrationIdFormat()
-car_monitor = InstantCheckingCarMonitor(license_plate_monitor, car_registry, registration_id_format)
-gate_controller = SerialGateController('COM5')
-display_controller_subject = BehaviorSubject[DisplayControllerEvent](None)
+display_controller_subject = Subject[DisplayControllerEvent]()
 parking_space_counter = ActualParkingSpaceCounter(ActualParkingSpaceCountRepository())
 display_controller = SubjectDisplayController(display_controller_subject, parking_space_counter)
 log_repository = ActualCarLogRepository()
-car_logger = ActualCarLogger(log_repository, video_stream_provider)
-parking_access_control = ParkingEntranceControl(
-    car_monitor,
-    gate_controller,
+
+serial = Serial('COM9', 9600, timeout=1)
+
+entrance_video_stream_provider = SourceVideoStreamProvider(0)
+entrance_license_plate_monitor = ActualLicensePlateMonitor(entrance_video_stream_provider, headless=False)
+entrance_car_monitor = InstantCheckingCarMonitor(entrance_license_plate_monitor, car_registry, registration_id_format)
+entrance_gate_controller = SerialGateController(entrance=True, serial=serial)
+# entrance_gate_controller = PrintingGateController()
+entrance_car_logger = ActualCarLogger(log_repository, entrance_video_stream_provider)
+parking_entrance_control = ParkingEntranceControl(
+    entrance_car_monitor,
+    entrance_gate_controller,
     display_controller,
     parking_space_counter,
-    car_logger,
+    entrance_car_logger,
 )
 
-parking_access_control.start()
+parking_entrance_control.start()
+
+exit_video_stream_provider = SourceVideoStreamProvider(1)
+exit_license_plate_monitor = ActualLicensePlateMonitor(exit_video_stream_provider, headless=False)
+exit_car_monitor = InstantCheckingCarMonitor(exit_license_plate_monitor, car_registry, registration_id_format)
+exit_gate_controller = SerialGateController(entrance=False, serial=serial)
+# exit_gate_controller = PrintingGateController()
+exit_car_logger = ActualCarLogger(log_repository, exit_video_stream_provider)
+parking_exit_control = ParkingExitControl(
+    exit_car_monitor,
+    exit_gate_controller,
+    display_controller,
+    parking_space_counter,
+    exit_car_logger,
+)
+
+parking_exit_control.start()
 
 app = FastAPI()
 

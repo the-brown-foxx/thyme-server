@@ -5,6 +5,7 @@ from service.connection.connection_manager import ConnectionManager
 from service.registry.model.car import Car
 
 
+# TODO: Remove this class?
 class ConnectedDisplayController(DisplayController):
     connection_manager: ConnectionManager
 
@@ -30,3 +31,6 @@ class ConnectedDisplayController(DisplayController):
                 'registration_id': registration_id,
             })
         )
+
+    def update_vacant_space(self, vacant_space: int):
+        pass

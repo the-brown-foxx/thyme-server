@@ -2,11 +2,9 @@ from typing import Optional
 
 from peewee import DoesNotExist
 
-from service.authorizer.log.repository.car_log_entity import CarLogEntity
 from service.authorizer.parking.model.parking_space_count import ParkingSpaceCount
-from service.authorizer.parking.repository.parking_space_count_repository import ParkingSpaceCountRepository
 from service.authorizer.parking.repository.parking_space_count_entity import ParkingSpaceCountEntity
-from service.exception import UnsetParkingSpaceError
+from service.authorizer.parking.repository.parking_space_count_repository import ParkingSpaceCountRepository
 
 
 class ActualParkingSpaceCountRepository(ParkingSpaceCountRepository):
