@@ -7,7 +7,7 @@ from service.registry.model.car import Car
 from sockets.run_async import run_async
 
 
-async def handle_display_websocket(
+async def handle_display_controller_websocket(
         websocket: WebSocket,
         parking_space_counter: ParkingSpaceCounter,
         display_controller_subject: Subject[DisplayControllerEvent],

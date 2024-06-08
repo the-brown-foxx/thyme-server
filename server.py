@@ -31,6 +31,7 @@ from service.registry.actual_car_registry import ActualCarRegistry
 from service.registry.repository.actual_car_repository import ActualCarRepository
 from sockets.car_logger import handle_car_logger_websocket
 from sockets.car_registry import handle_car_registry_websocket
+from sockets.display_controller import handle_display_controller_websocket
 from sockets.parking_space_counter import handle_parking_space_counter_websocket
 
 app = FastAPI()
@@ -43,7 +44,6 @@ admin_authenticator: AdminAuthenticator = ActualAdminAuthenticator(
 )
 
 car_registry_websocket_manager = WebsocketManager(admin_authenticator)
-
 
 registration_id_format = AnyRegistrationIdFormat()
 registration_id_filter = ScoringRegistrationIdFilter(registration_id_format)
@@ -69,6 +69,7 @@ parking_entrance_control = ParkingEntranceControl(
 )
 
 parking_entrance_control.start()
+
 
 # exit_video_stream_provider = SourceVideoStreamProvider(1)
 # exit_license_plate_monitor = ActualLicensePlateMonitor(exit_video_stream_provider, headless=False)
@@ -179,3 +180,8 @@ async def car_logger_websocket(websocket: WebSocket):
 @app.websocket('/parking-space-counter')
 async def parking_space_counter_websocket(websocket: WebSocket):
     await handle_parking_space_counter_websocket(car_registry_websocket_manager, parking_space_counter, websocket)
+
+
+@app.websocket('/display-controller')
+async def display_controller_websocket(websocket: WebSocket):
+    await handle_display_controller_websocket(websocket, parking_space_counter, display_controller_subject)
