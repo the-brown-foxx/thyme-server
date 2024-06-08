@@ -18,5 +18,5 @@ class AdminAuthenticator(ABC):
         pass
 
     @abstractmethod
-    def require_authentication(self, token: Token):
+    def require_authentication(self, token: Optional[Token]):
         pass

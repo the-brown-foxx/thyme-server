@@ -53,7 +53,10 @@ class ActualAdminAuthenticator(AdminAuthenticator):
 
         self.admin_password_repository.update_password(new_password)
 
-    def require_authentication(self, token: Token):
+    def require_authentication(self, token: Optional[Token]):
+        if token is None:
+            raise InvalidTokenError()
+
         try:
             claim = self.token_processor.decode_token(token)
             saved_password = self.admin_password_repository.get_password()

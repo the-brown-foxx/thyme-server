@@ -1,3 +1,5 @@
 /.venv/
-/.idea/discord.xml
+/.idea/
+!.idea/runConfigurations/
 /image/
+
