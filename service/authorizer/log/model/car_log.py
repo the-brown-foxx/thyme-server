@@ -11,3 +11,13 @@ class CarLog:
     image: str
     sus: bool
     log_id: Optional[int] = field(default=None)
+
+    def to_dict(self) -> dict:
+        return {
+            'log_id': self.log_id,
+            'date_time': self.date_time.isoformat(),
+            'car_registration_id': self.car_registration_id,
+            'entering': self.entering,
+            'image': self.image,
+            'sus': self.sus,
+        }

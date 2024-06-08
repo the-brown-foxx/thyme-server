@@ -1,6 +1,9 @@
 from dataclasses import replace
 from datetime import datetime
 
+from reactivex import Subject, Observable
+from reactivex.subject import BehaviorSubject
+
 from service.authorizer.log.car_logger import CarLogger
 from service.authorizer.log.model.car_log import CarLog
 from service.authorizer.log.repository.car_log_repository import CarLogRepository
@@ -9,11 +12,24 @@ from service.authorizer.stream.video_stream_provider import VideoStreamProvider
 
 class ActualCarLogger(CarLogger):
     log_repository: CarLogRepository
-    video_stream_provider: VideoStreamProvider
+    # video_stream_provider: VideoStreamProvider
 
-    def __init__(self, log_repository: CarLogRepository, video_steam_provider: VideoStreamProvider):
+    logs: Subject[list[CarLog]]
+
+    def __init__(
+            self,
+            log_repository: CarLogRepository,
+            # video_steam_provider: VideoStreamProvider,
+    ):
         self.log_repository = log_repository
-        self.video_stream_provider = video_steam_provider
+        self.logs = BehaviorSubject(self.get_logs())
+        # self.video_stream_provider = video_steam_provider
+
+    def update_live_logs(self):
+        self.logs.on_next(self.get_logs())
+
+    def get_live_logs(self) -> Observable[list[CarLog]]:
+        return self.logs
 
     def get_logs(self) -> list[CarLog]:
         return self.log_repository.get_logs()
@@ -57,3 +73,5 @@ class ActualCarLogger(CarLogger):
                 sus=False,
             )
             self.log_repository.upsert_log(log)
+
+        self.update_live_logs()

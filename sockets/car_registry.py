@@ -43,7 +43,7 @@ async def handle_car_registry_websocket(
     async def async_on_next_cars(cars: list[Car]):\
         await websocket_manager.broadcast({
             'action': 'show_cars',
-            'cars': list(map(lambda car: car.to_dict(), cars)),
+            'cars': [car.to_dict() for car in cars],
         })
 
     def on_next_cars(cars: list[Car]):

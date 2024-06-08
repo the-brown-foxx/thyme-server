@@ -9,11 +9,15 @@ from service.authenticator.admin.actual_admin_authenticator import ActualAdminAu
 from service.authenticator.admin.admin_authenticator import AdminAuthenticator
 from service.authenticator.admin.repository.actual_admin_password_repository import ActualAdminPasswordRepository
 from service.authenticator.token.actual_token_processor import ActualTokenProcessor
+from service.authorizer.log.actual_car_logger import ActualCarLogger
+from service.authorizer.log.car_logger import CarLogger
+from service.authorizer.log.repository.actual_car_log_repository import ActualCarLogRepository
 from service.connection.websocket_manager import WebsocketManager
 from service.exception import RegistrationIdTakenError, FieldCannotBeBlankError, PasswordTooShortError
 from service.registry.actual_car_registry import ActualCarRegistry
 from service.registry.car_registry import CarRegistry
 from service.registry.repository.actual_car_repository import ActualCarRepository
+from sockets.car_logger import handle_car_logger_websocket
 from sockets.car_registry import handle_car_registry_websocket
 
 app = FastAPI()
@@ -28,6 +32,8 @@ admin_authenticator: AdminAuthenticator = ActualAdminAuthenticator(
 car_registry_websocket_manager = WebsocketManager(admin_authenticator)
 
 car_registry: CarRegistry = ActualCarRegistry(ActualCarRepository())
+
+car_logger: CarLogger = ActualCarLogger(ActualCarLogRepository())
 
 
 class Password(BaseModel):
@@ -114,3 +120,8 @@ async def change_password(password_change: PasswordChange):
 @app.websocket('/car-registry')
 async def car_registry_websocket(websocket: WebSocket):
     await handle_car_registry_websocket(car_registry_websocket_manager, car_registry, websocket)
+
+
+@app.websocket('/car-logger')
+async def car_logger_websocket(websocket: WebSocket):
+    await handle_car_logger_websocket(car_registry_websocket_manager, car_logger, websocket)

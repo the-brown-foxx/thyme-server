@@ -32,7 +32,7 @@ admin_authenticator: AdminAuthenticator = ActualAdminAuthenticator(
 )
 
 car_registry: CarRegistry = ActualCarRegistry(ActualCarRepository())
-car_logger: CarLogger = ActualCarLogger(ActualCarLogRepository(), SourceVideoStreamProvider(0))
+car_logger: CarLogger = ActualCarLogger(ActualCarLogRepository())
 parking_space_counter: ParkingSpaceCounter = ActualParkingSpaceCounter(ActualParkingSpaceCountRepository())
 oauth_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
