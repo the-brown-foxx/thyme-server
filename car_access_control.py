@@ -9,6 +9,7 @@ from service.authorizer.access.parking_exit_control import ParkingExitControl
 from service.authorizer.display.subject_display_controller import SubjectDisplayController, DisplayControllerEvent
 from service.authorizer.filter.scoring_registration_id_filter import ScoringRegistrationIdFilter
 from service.authorizer.format.any_registration_id_format import AnyRegistrationIdFormat
+from service.authorizer.gate.printing_gate_controller import PrintingGateController
 from service.authorizer.gate.serial_gate_controller import SerialGateController
 from service.authorizer.log.actual_car_logger import ActualCarLogger
 from service.authorizer.log.repository.actual_car_log_repository import ActualCarLogRepository
@@ -32,14 +33,12 @@ parking_space_counter = ActualParkingSpaceCounter(ActualParkingSpaceCountReposit
 display_controller = SubjectDisplayController(display_controller_subject, parking_space_counter)
 log_repository = ActualCarLogRepository()
 
-serial = Serial('COM9', 9600, timeout=1)
-
 entrance_video_stream_provider = SourceVideoStreamProvider(0)
 entrance_license_plate_monitor = ActualLicensePlateMonitor(entrance_video_stream_provider, headless=False)
 entrance_car_monitor = InstantCheckingCarMonitor(entrance_license_plate_monitor, car_registry, registration_id_format)
-entrance_gate_controller = SerialGateController(entrance=True, serial=serial)
+entrance_gate_controller = PrintingGateController()
 # entrance_gate_controller = PrintingGateController()
-entrance_car_logger = ActualCarLogger(log_repository, entrance_video_stream_provider)
+entrance_car_logger = ActualCarLogger(log_repository)
 parking_entrance_control = ParkingEntranceControl(
     entrance_car_monitor,
     entrance_gate_controller,
@@ -50,29 +49,28 @@ parking_entrance_control = ParkingEntranceControl(
 
 parking_entrance_control.start()
 
-exit_video_stream_provider = SourceVideoStreamProvider(1)
-exit_license_plate_monitor = ActualLicensePlateMonitor(exit_video_stream_provider, headless=False)
-exit_car_monitor = InstantCheckingCarMonitor(exit_license_plate_monitor, car_registry, registration_id_format)
-exit_gate_controller = SerialGateController(entrance=False, serial=serial)
+# exit_video_stream_provider = SourceVideoStreamProvider(1)
+# exit_license_plate_monitor = ActualLicensePlateMonitor(exit_video_stream_provider, headless=False)
+# exit_car_monitor = InstantCheckingCarMonitor(exit_license_plate_monitor, car_registry, registration_id_format)
 # exit_gate_controller = PrintingGateController()
-exit_car_logger = ActualCarLogger(log_repository, exit_video_stream_provider)
-parking_exit_control = ParkingExitControl(
-    exit_car_monitor,
-    exit_gate_controller,
-    display_controller,
-    parking_space_counter,
-    exit_car_logger,
-)
-
-parking_exit_control.start()
+# # exit_gate_controller = PrintingGateController()
+# exit_car_logger = ActualCarLogger(log_repository)
+# parking_exit_control = ParkingExitControl(
+#     exit_car_monitor,
+#     exit_gate_controller,
+#     display_controller,
+#     parking_space_counter,
+#     exit_car_logger,
+# )
+#
+# parking_exit_control.start()
 
 app = FastAPI()
 
 
 @app.websocket('/ws')
 async def display_web_socket(websocket: WebSocket):
-    connection_manager = WebsocketManager()
-    await connection_manager.connect(websocket)
+    await websocket.accept()
 
     vacant_space = parking_space_counter.get_parking_space_count().vacant_space
     await websocket.send_json({
@@ -122,6 +120,6 @@ async def display_web_socket(websocket: WebSocket):
         while True:
             await websocket.receive_text()
     except WebSocketDisconnect:
-        await connection_manager.disconnect(websocket)
+        pass
 
 # license_plate_monitor.get_thread().join()

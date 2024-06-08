@@ -38,6 +38,7 @@ class ActualCarLogger(CarLogger):
         return self.log_repository.get_logs_by_car_registration_id(car_registration_id)
 
     def log(self, car_registration_id: str, entering: bool):
+        print('Logged')
         # _, image_frame = self.video_stream_provider.get_stream().read()
         date_time = datetime.now()
         filename = f'LOG_{date_time.strftime('%d%m%y_%H%M%S_%f')}'

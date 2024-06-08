@@ -32,4 +32,4 @@ async def handle_car_logger_websocket(
             await websocket.receive_text()
 
     except WebSocketDisconnect:
-        await websocket_manager.disconnect(websocket)
+        websocket_manager.disconnect(websocket)

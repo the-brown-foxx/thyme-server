@@ -1,6 +1,6 @@
-from typing import Optional, Annotated
+from typing import Optional
 
-from fastapi import FastAPI, WebSocket, status, Depends
+from fastapi import FastAPI, WebSocket, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
@@ -12,13 +12,19 @@ from service.authenticator.token.actual_token_processor import ActualTokenProces
 from service.authorizer.log.actual_car_logger import ActualCarLogger
 from service.authorizer.log.car_logger import CarLogger
 from service.authorizer.log.repository.actual_car_log_repository import ActualCarLogRepository
+from service.authorizer.parking.actual_parking_space_counter import ActualParkingSpaceCounter
+from service.authorizer.parking.parking_space_counter import ParkingSpaceCounter
+from service.authorizer.parking.repository.actual_parking_space_count_repository import \
+    ActualParkingSpaceCountRepository
 from service.connection.websocket_manager import WebsocketManager
-from service.exception import RegistrationIdTakenError, FieldCannotBeBlankError, PasswordTooShortError
+from service.exception import PasswordTooShortError, \
+    IncorrectPasswordError, InvalidTokenError
 from service.registry.actual_car_registry import ActualCarRegistry
 from service.registry.car_registry import CarRegistry
 from service.registry.repository.actual_car_repository import ActualCarRepository
 from sockets.car_logger import handle_car_logger_websocket
 from sockets.car_registry import handle_car_registry_websocket
+from sockets.parking_space_counter import handle_parking_space_counter_websocket
 
 app = FastAPI()
 
@@ -35,6 +41,8 @@ car_registry: CarRegistry = ActualCarRegistry(ActualCarRepository())
 
 car_logger: CarLogger = ActualCarLogger(ActualCarLogRepository())
 
+parking_space_counter: ParkingSpaceCounter = ActualParkingSpaceCounter(ActualParkingSpaceCountRepository())
+
 
 class Password(BaseModel):
     password: str
@@ -45,30 +53,6 @@ class PasswordChange(BaseModel):
     new_password: str
 
 
-@app.exception_handler(RegistrationIdTakenError)
-async def registration_id_taken_exception_handler(_, exception: RegistrationIdTakenError):
-    return JSONResponse(
-        status_code=status.HTTP_409_CONFLICT,
-        content={
-            "status": "REGISTRATION_ID_TAKEN",
-            "registration_id": exception.registration_id,
-            "message": exception.message,
-        },
-    )
-
-
-@app.exception_handler(FieldCannotBeBlankError)
-async def field_cannot_be_blank_exception_handler(_, exception: FieldCannotBeBlankError):
-    return JSONResponse(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        content={
-            "status": "FIELD_CANNOT_BE_BLANK",
-            "field_name": exception.field_name,
-            "message": exception.message,
-        },
-    )
-
-
 @app.exception_handler(PasswordTooShortError)
 async def password_too_short_exception_handler(_, exception: PasswordTooShortError):
     return JSONResponse(
@@ -76,6 +60,28 @@ async def password_too_short_exception_handler(_, exception: PasswordTooShortErr
         content={
             "status": "PASSWORD_TOO_SHORT",
             "min_length": exception.min_length,
+            "message": exception.message,
+        },
+    )
+
+
+@app.exception_handler(IncorrectPasswordError)
+async def incorrect_password_exception_handler(_, exception: IncorrectPasswordError):
+    return JSONResponse(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        content={
+            "status": "INCORRECT_PASSWORD",
+            "message": exception.message,
+        },
+    )
+
+
+@app.exception_handler(InvalidTokenError)
+async def invalid_token_exception_handler(_, exception: InvalidTokenError):
+    return JSONResponse(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        content={
+            "status": "INVALID_TOKEN",
             "message": exception.message,
         },
     )
@@ -125,3 +131,8 @@ async def car_registry_websocket(websocket: WebSocket):
 @app.websocket('/car-logger')
 async def car_logger_websocket(websocket: WebSocket):
     await handle_car_logger_websocket(car_registry_websocket_manager, car_logger, websocket)
+
+
+@app.websocket('/parking-space-counter')
+async def parking_space_counter_websocket(websocket: WebSocket):
+    await handle_parking_space_counter_websocket(car_registry_websocket_manager, parking_space_counter, websocket)
