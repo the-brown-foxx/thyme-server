@@ -8,6 +8,7 @@ from service.connection.websocket_manager import WebsocketManager
 from service.registry.car_registry import CarRegistry
 from service.registry.model.car import Car
 from sockets.exception_handler import handle_websocket_exception
+from sockets.run_async import run_async
 
 
 class NewCar(BaseModel):
@@ -46,46 +47,30 @@ async def handle_car_registry_websocket(
         })
 
     def on_next_cars(cars: list[Car]):
-        try:
-            loop = asyncio.get_running_loop()
-            loop.create_task(async_on_next_cars(cars))
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            task = loop.create_task(async_on_next_cars(cars))
-            loop.run_until_complete(task)
+        run_async(async_on_next_cars(cars))
 
     car_registry.get_live_cars().subscribe(on_next_cars)
 
-    def _handle_action(_message: dict):
+    def handle_action(_message: dict):
         match _message['action']:
             case 'register':
                 car = NewCar.parse_obj(_message['car'])
                 car_registry.register_car(car)
-                websocket.send_json({
-                    "status": "SUCCESSFUL",
-                    "message": "Car registered successfully",
-                })
 
             case 'update':
                 car_update = CarUpdate.parse_obj(_message['car'])
                 car_registry.update_car(car_update)
-                websocket.send_json({
-                    "status": "SUCCESSFUL",
-                    "message": "Car updated successfully",
-                })
 
             case 'unregister':
                 car_registry.unregister_car(_message['registration_id'])
-                websocket.send_json({
-                    "status": "SUCCESSFUL",
-                    "message": "Car unregistered successfully",
-                })
+
+        run_async(websocket.send_json({"status": "SUCCESSFUL"}))
 
     try:
         while True:
             message = await websocket.receive_json()
-            await handle_websocket_exception(websocket, lambda: _handle_action(message))
+            print(message)
+            await handle_websocket_exception(websocket, lambda: handle_action(message))
 
     except WebSocketDisconnect:
         websocket_manager.disconnect(websocket)
