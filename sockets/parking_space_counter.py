@@ -1,5 +1,4 @@
-from pydantic import BaseModel
-from starlette.websockets import WebSocket, WebSocketDisconnect
+from fastapi import WebSocket, WebSocketDisconnect
 
 from service.authorizer.parking.model.parking_space_count import ParkingSpaceCount
 from service.authorizer.parking.parking_space_counter import ParkingSpaceCounter

@@ -4,23 +4,30 @@ from fastapi import FastAPI, WebSocket, status
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
+from reactivex import Subject
 
 from service.authenticator.admin.actual_admin_authenticator import ActualAdminAuthenticator
 from service.authenticator.admin.admin_authenticator import AdminAuthenticator
 from service.authenticator.admin.repository.actual_admin_password_repository import ActualAdminPasswordRepository
 from service.authenticator.token.actual_token_processor import ActualTokenProcessor
+from service.authorizer.access.parking_entrance_control import ParkingEntranceControl
+from service.authorizer.display.subject_display_controller import DisplayControllerEvent, SubjectDisplayController
+from service.authorizer.filter.scoring_registration_id_filter import ScoringRegistrationIdFilter
+from service.authorizer.format.any_registration_id_format import AnyRegistrationIdFormat
+from service.authorizer.gate.printing_gate_controller import PrintingGateController
 from service.authorizer.log.actual_car_logger import ActualCarLogger
 from service.authorizer.log.car_logger import CarLogger
 from service.authorizer.log.repository.actual_car_log_repository import ActualCarLogRepository
+from service.authorizer.monitor.car.instant_checking_car_monitor import InstantCheckingCarMonitor
+from service.authorizer.monitor.license.actual_license_plate_monitor import ActualLicensePlateMonitor
 from service.authorizer.parking.actual_parking_space_counter import ActualParkingSpaceCounter
-from service.authorizer.parking.parking_space_counter import ParkingSpaceCounter
 from service.authorizer.parking.repository.actual_parking_space_count_repository import \
     ActualParkingSpaceCountRepository
+from service.authorizer.stream.webcam_video_stream_provider import SourceVideoStreamProvider
 from service.connection.websocket_manager import WebsocketManager
 from service.exception import PasswordTooShortError, \
     IncorrectPasswordError, InvalidTokenError
 from service.registry.actual_car_registry import ActualCarRegistry
-from service.registry.car_registry import CarRegistry
 from service.registry.repository.actual_car_repository import ActualCarRepository
 from sockets.car_logger import handle_car_logger_websocket
 from sockets.car_registry import handle_car_registry_websocket
@@ -37,11 +44,47 @@ admin_authenticator: AdminAuthenticator = ActualAdminAuthenticator(
 
 car_registry_websocket_manager = WebsocketManager(admin_authenticator)
 
-car_registry: CarRegistry = ActualCarRegistry(ActualCarRepository())
 
+registration_id_format = AnyRegistrationIdFormat()
+registration_id_filter = ScoringRegistrationIdFilter(registration_id_format)
+car_repository = ActualCarRepository()
+car_registry = ActualCarRegistry(car_repository)
+display_controller_subject = Subject[DisplayControllerEvent]()
+parking_space_counter = ActualParkingSpaceCounter(ActualParkingSpaceCountRepository())
+display_controller = SubjectDisplayController(display_controller_subject, parking_space_counter)
+log_repository = ActualCarLogRepository()
+
+entrance_video_stream_provider = SourceVideoStreamProvider(0)
+entrance_license_plate_monitor = ActualLicensePlateMonitor(entrance_video_stream_provider, headless=False)
+entrance_car_monitor = InstantCheckingCarMonitor(entrance_license_plate_monitor, car_registry, registration_id_format)
+entrance_gate_controller = PrintingGateController()
+# entrance_gate_controller = PrintingGateController()
 car_logger: CarLogger = ActualCarLogger(ActualCarLogRepository())
+parking_entrance_control = ParkingEntranceControl(
+    entrance_car_monitor,
+    entrance_gate_controller,
+    display_controller,
+    parking_space_counter,
+    car_logger,
+)
 
-parking_space_counter: ParkingSpaceCounter = ActualParkingSpaceCounter(ActualParkingSpaceCountRepository())
+parking_entrance_control.start()
+
+# exit_video_stream_provider = SourceVideoStreamProvider(1)
+# exit_license_plate_monitor = ActualLicensePlateMonitor(exit_video_stream_provider, headless=False)
+# exit_car_monitor = InstantCheckingCarMonitor(exit_license_plate_monitor, car_registry, registration_id_format)
+# exit_gate_controller = PrintingGateController()
+# # exit_gate_controller = PrintingGateController()
+# exit_car_logger = ActualCarLogger(log_repository)
+# parking_exit_control = ParkingExitControl(
+#     exit_car_monitor,
+#     exit_gate_controller,
+#     display_controller,
+#     parking_space_counter,
+#     exit_car_logger,
+# )
+#
+# parking_exit_control.start()
 
 
 class Password(BaseModel):
