@@ -20,9 +20,13 @@ from service.authorizer.log.car_logger import CarLogger
 from service.authorizer.log.repository.actual_car_log_repository import ActualCarLogRepository
 from service.authorizer.monitor.car.instant_checking_car_monitor import InstantCheckingCarMonitor
 from service.authorizer.monitor.license.actual_license_plate_monitor import ActualLicensePlateMonitor
+from service.authorizer.monitor.license.modular_license_plate_monitor import ModularLicensePlateMonitor
 from service.authorizer.parking.actual_parking_space_counter import ActualParkingSpaceCounter
 from service.authorizer.parking.repository.actual_parking_space_count_repository import \
     ActualParkingSpaceCountRepository
+from service.authorizer.recognition.detector.yolo_license_plate_detector import YoloLicensePlateDetector
+from service.authorizer.recognition.preprocessor.license_plate_preprocessor import LicensePlatePreprocessor
+from service.authorizer.recognition.reader.easy_orc_text_reader import EasyOcrTextReader
 from service.authorizer.stream.webcam_video_stream_provider import SourceVideoStreamProvider
 from service.connection.websocket_manager import WebsocketManager
 from service.exception import PasswordTooShortError, \
@@ -55,7 +59,14 @@ display_controller = SubjectDisplayController(display_controller_subject, parkin
 log_repository = ActualCarLogRepository()
 
 entrance_video_stream_provider = SourceVideoStreamProvider(0)
-entrance_license_plate_monitor = ActualLicensePlateMonitor(entrance_video_stream_provider, headless=False)
+# entrance_license_plate_monitor = ActualLicensePlateMonitor(entrance_video_stream_provider, headless=False)
+entrance_license_plate_monitor = ModularLicensePlateMonitor(
+    'Entrance',
+    entrance_video_stream_provider,
+    YoloLicensePlateDetector(),
+    LicensePlatePreprocessor(),
+    EasyOcrTextReader(),
+)
 entrance_car_monitor = InstantCheckingCarMonitor(entrance_license_plate_monitor, car_registry, registration_id_format)
 entrance_gate_controller = PrintingGateController()
 # entrance_gate_controller = PrintingGateController()
@@ -70,9 +81,16 @@ parking_entrance_control = ParkingEntranceControl(
 
 parking_entrance_control.start()
 
-
+# TODO: Uncomment
 # exit_video_stream_provider = SourceVideoStreamProvider(1)
 # exit_license_plate_monitor = ActualLicensePlateMonitor(exit_video_stream_provider, headless=False)
+# exit_license_plate_monitor = ModularLicensePlateMonitor(
+#     'Entrance',
+#     exit_video_stream_provider,
+#     YoloLicensePlateDetector(),
+#     LicensePlatePreprocessor(),
+#     EasyOcrTextReader(),
+# )
 # exit_car_monitor = InstantCheckingCarMonitor(exit_license_plate_monitor, car_registry, registration_id_format)
 # exit_gate_controller = PrintingGateController()
 # # exit_gate_controller = PrintingGateController()

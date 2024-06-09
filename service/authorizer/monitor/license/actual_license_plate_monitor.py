@@ -11,6 +11,7 @@ from service.authorizer.monitor.license.license_plate_monitor import LicensePlat
 from service.authorizer.stream.video_stream_provider import VideoStreamProvider
 
 
+# I just realized that I didn't even return the preprocessed image. The OCR just be rawdogging the colored image😭
 def preprocess_license_plate(license_plate):
     if license_plate is not None:
         gray_license_plate = cv2.cvtColor(license_plate, cv2.COLOR_BGR2GRAY)
@@ -38,7 +39,7 @@ class ActualLicensePlateMonitor(LicensePlateMonitor):
         self.video_stream_provider = video_stream_provider
         self.registration_id_stream = Subject()
 
-        self.thread = Thread(target=self.start, args=(headless, ))
+        self.thread = Thread(target=self.start, args=(headless,))
         self.thread.start()
 
     def crop_license_plate(self, frame):
