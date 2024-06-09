@@ -8,7 +8,7 @@ from service.connection.websocket_manager import WebsocketManager
 from service.registry.car_registry import CarRegistry
 from service.registry.model.car import Car
 from sockets.exception_handler import handle_websocket_exception
-from sockets.run_async import run_async
+from service.run_async import run_async
 
 
 class NewCar(BaseModel):

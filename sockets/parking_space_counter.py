@@ -4,7 +4,7 @@ from service.authorizer.parking.model.parking_space_count import ParkingSpaceCou
 from service.authorizer.parking.parking_space_counter import ParkingSpaceCounter
 from service.connection.websocket_manager import WebsocketManager
 from sockets.exception_handler import handle_websocket_exception
-from sockets.run_async import run_async
+from service.run_async import run_async
 
 
 async def handle_parking_space_counter_websocket(

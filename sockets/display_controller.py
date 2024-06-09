@@ -4,7 +4,7 @@ from reactivex import Subject
 from service.authorizer.display.subject_display_controller import DisplayControllerEvent
 from service.authorizer.parking.parking_space_counter import ParkingSpaceCounter
 from service.registry.model.car import Car
-from sockets.run_async import run_async
+from service.run_async import run_async
 
 
 async def handle_display_controller_websocket(
@@ -50,10 +50,10 @@ async def handle_display_controller_websocket(
                 'registration_id': event,
             })
 
-    display_controller_subject.subscribe(lambda event: run_async(on_next(event)))
+    subscription = display_controller_subject.subscribe(lambda event: run_async(on_next(event)))
 
     try:
         while True:
             await websocket.receive_text()
     except WebSocketDisconnect:
-        pass
+        subscription.dispose()
