@@ -7,5 +7,5 @@ from service.authorizer.recognition.detector.model.image import Image
 
 class ImagePreprocessor(ABC):
     @abstractmethod
-    def preprocess(self, frame: Image, detection: ObjectDetection) -> Optional[Image]:
+    def preprocess(self, frame: Image, detection: ObjectDetection, threshold: int) -> Optional[Image]:
         pass

@@ -14,6 +14,7 @@ from service.authorizer.access.parking_entrance_control import ParkingEntranceCo
 from service.authorizer.display.subject_display_controller import DisplayControllerEvent, SubjectDisplayController
 from service.authorizer.filter.scoring_registration_id_filter import ScoringRegistrationIdFilter
 from service.authorizer.format.any_registration_id_format import AnyRegistrationIdFormat
+from service.authorizer.format.philippine_registration_id_format import PhilippineRegistrationIdFormat
 from service.authorizer.gate.printing_gate_controller import PrintingGateController
 from service.authorizer.log.actual_car_logger import ActualCarLogger
 from service.authorizer.log.car_logger import CarLogger
@@ -49,7 +50,7 @@ admin_authenticator: AdminAuthenticator = ActualAdminAuthenticator(
 
 car_registry_websocket_manager = WebsocketManager(admin_authenticator)
 
-registration_id_format = AnyRegistrationIdFormat()
+registration_id_format = PhilippineRegistrationIdFormat()
 registration_id_filter = ScoringRegistrationIdFilter(registration_id_format)
 car_repository = ActualCarRepository()
 car_registry = ActualCarRegistry(car_repository)
@@ -58,7 +59,7 @@ parking_space_counter = ActualParkingSpaceCounter(ActualParkingSpaceCountReposit
 display_controller = SubjectDisplayController(display_controller_subject, parking_space_counter)
 log_repository = ActualCarLogRepository()
 
-entrance_video_stream_provider = SourceVideoStreamProvider(0)
+entrance_video_stream_provider = SourceVideoStreamProvider(1)
 # entrance_license_plate_monitor = ActualLicensePlateMonitor(entrance_video_stream_provider, headless=False)
 entrance_license_plate_monitor = ModularLicensePlateMonitor(
     'Entrance',

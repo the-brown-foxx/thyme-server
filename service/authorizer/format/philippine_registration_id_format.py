@@ -5,11 +5,7 @@ from service.authorizer.format.registration_id_format import RegistrationIdForma
 
 class PhilippineRegistrationIdFormat(RegistrationIdFormat):
     def preformat(self, registration_id: str) -> str:
-        return (registration_id
-                .upper()
-                .replace(' ', '')
-                .replace('.', '')
-                .replace('*', ''))
+        return ''.join(filter(lambda char: char.isalnum(), registration_id))
 
     def valid(self, registration_id: str) -> bool:
         try:

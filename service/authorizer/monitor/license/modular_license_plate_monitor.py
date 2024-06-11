@@ -5,6 +5,7 @@ from reactivex import Subject, Observable
 
 from service.authorizer.monitor.license.license_plate_monitor import LicensePlateMonitor
 from service.authorizer.recognition.detector.model.image import Image
+from service.authorizer.recognition.detector.model.object_detection import ObjectDetection
 from service.authorizer.recognition.detector.object_detector import ObjectDetector
 from service.authorizer.recognition.preprocessor.image_preprocessor import ImagePreprocessor
 from service.authorizer.recognition.reader.text_reader import TextReader
@@ -56,14 +57,16 @@ class ModularLicensePlateMonitor(LicensePlateMonitor):
         if license_plate_detection is None:
             return
 
-        preprocessed_license_plate = self.license_plate_preprocessor.preprocess(frame, license_plate_detection)
-        if preprocessed_license_plate is None:
-            return
+        self._read_at_threshold(frame, license_plate_detection, 64)
+        self._read_at_threshold(frame, license_plate_detection, 90)
+        self._read_at_threshold(frame, license_plate_detection, 120)
+        # self._read_at_threshold(frame, license_plate_detection, 150)
 
-        registration_id_detection = self.license_plate_reader.read(preprocessed_license_plate)
+    def _read_at_threshold(self, frame: Image, license_plate_detection: ObjectDetection, threshold: int):
+        preprocessed_license_plate = self.license_plate_preprocessor.preprocess(frame, license_plate_detection, threshold)
+        if preprocessed_license_plate is not None:
+            cv2.imshow(f'License Plate Monitor [{self.name} T-{threshold}]', preprocessed_license_plate)
+            registration_id_detection = self.license_plate_reader.read(preprocessed_license_plate)
 
-        if registration_id_detection is not None:
-            self.registration_id_stream.on_next(registration_id_detection.value)
-            print(registration_id_detection)
-            cv2.imshow(f'License Plate Monitor [{self.name}]', preprocessed_license_plate)
-            cv2.putText(frame, registration_id_detection.value, (0, 0), cv2.FONT_HERSHEY_PLAIN, 1, (255, 0, 0))
+            if registration_id_detection is not None:
+                self.registration_id_stream.on_next(registration_id_detection.value)

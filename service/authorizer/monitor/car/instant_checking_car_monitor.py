@@ -34,6 +34,7 @@ class InstantCheckingCarMonitor(CarMonitor):
 
     def on_next(self, registration_id: str):
         registration_id = self.registration_id_format.preformat(registration_id)
+        print(registration_id)
         if not self.registration_id_format.valid(registration_id):
             return
 
@@ -43,6 +44,7 @@ class InstantCheckingCarMonitor(CarMonitor):
             if self.car_passed:
                 self.car_stream.on_next(car)
                 self.car_passed = False
+
         except CarNotFoundError:
             new_score = self.failure_scores.get(registration_id, 0) + 1
             self.failure_scores[registration_id] = new_score
