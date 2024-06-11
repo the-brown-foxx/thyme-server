@@ -1,22 +1,17 @@
-from typing import Union, Optional
+from dataclasses import replace
 
 from reactivex import Observable, Subject
 
 from service.authorizer.format.registration_id_format import RegistrationIdFormat
 from service.authorizer.monitor.car.car_monitor import CarMonitor
 from service.authorizer.monitor.license.license_plate_monitor import LicensePlateMonitor
+from service.authorizer.monitor.model.car_snapshot import CarSnapshot
 from service.exception import CarNotFoundError
 from service.registry.car_registry import CarRegistry
-from service.registry.model.car import Car
 
 
 class InstantCheckingCarMonitor(CarMonitor):
-    failing_score = 20  # TODO: This could be raised in actual, because the car will stop in front of the gate
-    car_registry: CarRegistry
-    registration_id_format: RegistrationIdFormat
-    car_passed: bool
-    failure_scores: dict[str, int]
-    car_stream: Subject[Union[Car, str]]
+    failing_score = 20
 
     def __init__(
             self,
@@ -26,23 +21,23 @@ class InstantCheckingCarMonitor(CarMonitor):
     ):
         self.car_registry = car_registry
         self.registration_id_format = registration_id_format
-        self.failure_scores = {}
+        self.failure_scores: dict[str, int] = {}
         self.car_passed = True
-        self.car_stream = Subject()
+        self.car_stream: Subject[CarSnapshot] = Subject()
         (license_plate_monitor.get_registration_id_stream()
-         .subscribe(lambda registration_id: self.on_next(registration_id)))
+         .subscribe(lambda car_snapshot: self.on_next(car_snapshot)))
 
-    def on_next(self, registration_id: str):
-        registration_id = self.registration_id_format.preformat(registration_id)
-        print(registration_id)
+    def on_next(self, car_snapshot: CarSnapshot):
+        registration_id = self.registration_id_format.preformat(car_snapshot.registration_id)
+        print(registration_id)  # TODO: Comment this out
         if not self.registration_id_format.valid(registration_id):
             return
 
         try:
-            car = self.car_registry.get_car(registration_id)
-
             if self.car_passed:
-                self.car_stream.on_next(car)
+                car = self.car_registry.get_car(registration_id)
+                car_snapshot = replace(car_snapshot, car=car)
+                self.car_stream.on_next(car_snapshot)
                 self.car_passed = False
 
         except CarNotFoundError:
@@ -51,9 +46,9 @@ class InstantCheckingCarMonitor(CarMonitor):
 
             if self.failure_scores[registration_id] >= self.failing_score:
                 self.failure_scores = {}
-                self.car_stream.on_next(registration_id)
+                self.car_stream.on_next(car_snapshot)
 
-    def get_car_stream(self) -> Observable[Union[Car, str]]:
+    def get_car_stream(self) -> Observable[CarSnapshot]:
         return self.car_stream
 
     def mark_car_as_passed(self):

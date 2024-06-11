@@ -7,12 +7,10 @@ from reactivex.subject import BehaviorSubject
 from service.authorizer.log.car_logger import CarLogger
 from service.authorizer.log.model.car_log import CarLog
 from service.authorizer.log.repository.car_log_repository import CarLogRepository
-from service.authorizer.stream.video_stream_provider import VideoStreamProvider
 
 
 class ActualCarLogger(CarLogger):
     log_repository: CarLogRepository
-    # video_stream_provider: VideoStreamProvider
 
     logs: Subject[list[CarLog]]
 
@@ -49,7 +47,7 @@ class ActualCarLogger(CarLogger):
             key=lambda element: element.date_time,
         )
 
-        if len(sus_tracker) > 0:
+        if entering and len(sus_tracker) > 0:
             last = sus_tracker[len(sus_tracker) - 1]
             sus = last.entering
             log = CarLog(

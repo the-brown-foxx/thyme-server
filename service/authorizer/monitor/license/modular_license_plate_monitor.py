@@ -4,6 +4,7 @@ import cv2
 from reactivex import Subject, Observable
 
 from service.authorizer.monitor.license.license_plate_monitor import LicensePlateMonitor
+from service.authorizer.monitor.model.car_snapshot import CarSnapshot
 from service.authorizer.recognition.detector.model.image import Image
 from service.authorizer.recognition.detector.model.object_detection import ObjectDetection
 from service.authorizer.recognition.detector.object_detector import ObjectDetector
@@ -23,7 +24,7 @@ class ModularLicensePlateMonitor(LicensePlateMonitor):
     ):
         self.name = name
         self.video_stream_provider = video_stream_provider
-        self.registration_id_stream = Subject[str]()
+        self.car_snapshots = Subject[CarSnapshot]()
         self.license_plate_detector = license_plate_detector
         self.license_plate_preprocessor = license_plate_preprocessor
         self.license_plate_reader = registration_id_reader
@@ -31,8 +32,8 @@ class ModularLicensePlateMonitor(LicensePlateMonitor):
         self.thread = Thread(target=self._start)
         self.thread.start()
 
-    def get_registration_id_stream(self) -> Observable[str]:
-        return self.registration_id_stream
+    def get_registration_id_stream(self) -> Observable[CarSnapshot]:
+        return self.car_snapshots
 
     def get_thread(self) -> Thread:
         return self.thread
@@ -57,16 +58,19 @@ class ModularLicensePlateMonitor(LicensePlateMonitor):
         if license_plate_detection is None:
             return
 
-        self._read_at_threshold(frame, license_plate_detection, 64)
-        self._read_at_threshold(frame, license_plate_detection, 90)
-        self._read_at_threshold(frame, license_plate_detection, 120)
-        # self._read_at_threshold(frame, license_plate_detection, 150)
+        for threshold in self.video_stream_provider.get_thresholds():
+            self._read_at_threshold(frame, license_plate_detection, threshold)
 
     def _read_at_threshold(self, frame: Image, license_plate_detection: ObjectDetection, threshold: int):
-        preprocessed_license_plate = self.license_plate_preprocessor.preprocess(frame, license_plate_detection, threshold)
+        preprocessed_license_plate = self.license_plate_preprocessor.preprocess(
+            frame,
+            license_plate_detection,
+            threshold,
+        )
         if preprocessed_license_plate is not None:
             cv2.imshow(f'License Plate Monitor [{self.name} T-{threshold}]', preprocessed_license_plate)
             registration_id_detection = self.license_plate_reader.read(preprocessed_license_plate)
 
             if registration_id_detection is not None:
-                self.registration_id_stream.on_next(registration_id_detection.value)
+                car_snapshot = CarSnapshot(registration_id_detection.value, frame)
+                self.car_snapshots.on_next(car_snapshot)

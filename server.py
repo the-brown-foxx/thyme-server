@@ -10,7 +10,8 @@ from service.authenticator.admin.actual_admin_authenticator import ActualAdminAu
 from service.authenticator.admin.admin_authenticator import AdminAuthenticator
 from service.authenticator.admin.repository.actual_admin_password_repository import ActualAdminPasswordRepository
 from service.authenticator.token.actual_token_processor import ActualTokenProcessor
-from service.authorizer.access.parking_entrance_control import ParkingEntranceControl
+from service.authorizer.access.actual_parking_entrance_control import ActualParkingAccessControl
+from service.authorizer.display.printing_display_controller import PrintingDisplayController
 from service.authorizer.display.subject_display_controller import DisplayControllerEvent, SubjectDisplayController
 from service.authorizer.filter.scoring_registration_id_filter import ScoringRegistrationIdFilter
 from service.authorizer.format.any_registration_id_format import AnyRegistrationIdFormat
@@ -20,7 +21,6 @@ from service.authorizer.log.actual_car_logger import ActualCarLogger
 from service.authorizer.log.car_logger import CarLogger
 from service.authorizer.log.repository.actual_car_log_repository import ActualCarLogRepository
 from service.authorizer.monitor.car.instant_checking_car_monitor import InstantCheckingCarMonitor
-from service.authorizer.monitor.license.actual_license_plate_monitor import ActualLicensePlateMonitor
 from service.authorizer.monitor.license.modular_license_plate_monitor import ModularLicensePlateMonitor
 from service.authorizer.parking.actual_parking_space_counter import ActualParkingSpaceCounter
 from service.authorizer.parking.repository.actual_parking_space_count_repository import \
@@ -50,17 +50,15 @@ admin_authenticator: AdminAuthenticator = ActualAdminAuthenticator(
 
 car_registry_websocket_manager = WebsocketManager(admin_authenticator)
 
-registration_id_format = PhilippineRegistrationIdFormat()
+registration_id_format = AnyRegistrationIdFormat()  # TODO: Change to PhilippineRegistrationIdFormat()
 registration_id_filter = ScoringRegistrationIdFilter(registration_id_format)
 car_repository = ActualCarRepository()
 car_registry = ActualCarRegistry(car_repository)
 display_controller_subject = Subject[DisplayControllerEvent]()
 parking_space_counter = ActualParkingSpaceCounter(ActualParkingSpaceCountRepository())
-display_controller = SubjectDisplayController(display_controller_subject, parking_space_counter)
-log_repository = ActualCarLogRepository()
+car_logger: CarLogger = ActualCarLogger(ActualCarLogRepository())
 
-entrance_video_stream_provider = SourceVideoStreamProvider(1)
-# entrance_license_plate_monitor = ActualLicensePlateMonitor(entrance_video_stream_provider, headless=False)
+entrance_video_stream_provider = SourceVideoStreamProvider(1, [64, 90, 120])
 entrance_license_plate_monitor = ModularLicensePlateMonitor(
     'Entrance',
     entrance_video_stream_provider,
@@ -69,42 +67,39 @@ entrance_license_plate_monitor = ModularLicensePlateMonitor(
     EasyOcrTextReader(),
 )
 entrance_car_monitor = InstantCheckingCarMonitor(entrance_license_plate_monitor, car_registry, registration_id_format)
-entrance_gate_controller = PrintingGateController()
-# entrance_gate_controller = PrintingGateController()
-car_logger: CarLogger = ActualCarLogger(ActualCarLogRepository())
-parking_entrance_control = ParkingEntranceControl(
+entrance_gate_controller = PrintingGateController(entrance=True)
+entrance_display_controller = SubjectDisplayController(display_controller_subject, parking_space_counter)
+parking_entrance_control = ActualParkingAccessControl(
     entrance_car_monitor,
     entrance_gate_controller,
-    display_controller,
+    entrance_display_controller,
     parking_space_counter,
     car_logger,
+    entrance=True,
 )
 
-parking_entrance_control.start()
-
-# TODO: Uncomment
-# exit_video_stream_provider = SourceVideoStreamProvider(1)
-# exit_license_plate_monitor = ActualLicensePlateMonitor(exit_video_stream_provider, headless=False)
-# exit_license_plate_monitor = ModularLicensePlateMonitor(
-#     'Entrance',
-#     exit_video_stream_provider,
-#     YoloLicensePlateDetector(),
-#     LicensePlatePreprocessor(),
-#     EasyOcrTextReader(),
-# )
-# exit_car_monitor = InstantCheckingCarMonitor(exit_license_plate_monitor, car_registry, registration_id_format)
-# exit_gate_controller = PrintingGateController()
-# # exit_gate_controller = PrintingGateController()
-# exit_car_logger = ActualCarLogger(log_repository)
-# parking_exit_control = ParkingExitControl(
-#     exit_car_monitor,
-#     exit_gate_controller,
-#     display_controller,
-#     parking_space_counter,
-#     exit_car_logger,
-# )
-#
-# parking_exit_control.start()
+exit_video_stream_provider = SourceVideoStreamProvider(0, [64, 90, 120])
+exit_license_plate_monitor = ModularLicensePlateMonitor(
+    'Exit',
+    exit_video_stream_provider,
+    YoloLicensePlateDetector(),
+    LicensePlatePreprocessor(),
+    EasyOcrTextReader(),
+)
+exit_car_monitor = InstantCheckingCarMonitor(exit_license_plate_monitor, car_registry, registration_id_format)
+exit_gate_controller = PrintingGateController(entrance=False)
+exit_display_controller = PrintingDisplayController(
+    lambda vacant_space: entrance_display_controller.update_vacant_space(vacant_space),
+    entrance=False,
+)
+parking_exit_control = ActualParkingAccessControl(
+    exit_car_monitor,
+    exit_gate_controller,
+    exit_display_controller,
+    parking_space_counter,
+    car_logger,
+    entrance=False,
+)
 
 
 class Password(BaseModel):

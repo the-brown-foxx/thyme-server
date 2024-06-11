@@ -9,5 +9,5 @@ class VideoStreamProvider(ABC):
         pass
 
     @abstractmethod
-    def get_fps(self) -> int:
+    def get_thresholds(self) -> list[int]:
         pass

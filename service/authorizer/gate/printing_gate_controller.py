@@ -12,8 +12,12 @@ def on_vehicle_passed(subject: Subject[bool]):
 
 
 class PrintingGateController(GateController):
+    def __init__(self, entrance: bool):
+        self.entrance = entrance
+
     def open_gate(self) -> Observable[bool]:
-        print('Gate is open!')
+        gate = 'Entrance' if self.entrance else 'Exit'
+        print(f'{gate} gate is open!')
         vehicle_passed = Subject[bool]()
         Timer(10, on_vehicle_passed, args=(vehicle_passed, )).start()
         return vehicle_passed
