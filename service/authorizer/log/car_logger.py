@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from reactivex import Observable
 
 from service.authorizer.log.model.car_log import CarLog
+from service.authorizer.monitor.model.car_snapshot import CarSnapshot
 
 
 class CarLogger(ABC):
@@ -19,5 +20,5 @@ class CarLogger(ABC):
         pass
 
     @abstractmethod
-    def log(self, car_registration_id: str, entering: bool):
+    def log(self, car_snapshot: CarSnapshot, entering: bool):
         pass

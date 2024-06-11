@@ -1,7 +1,7 @@
 from typing import Optional
 
 from fastapi import FastAPI, WebSocket, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 from reactivex import Subject
@@ -179,6 +179,11 @@ async def change_password(password_change: PasswordChange):
         "status": "SUCCESSFUL",
         "message": "Password changed successfully",
     }
+
+
+@app.get("/snapshots/{filename}")
+async def get_snapshot(filename: str):
+    return FileResponse(f"snapshots/{filename}")
 
 
 @app.websocket('/car-registry')

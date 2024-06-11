@@ -1,12 +1,14 @@
 from dataclasses import replace
 from datetime import datetime
 
+import cv2
 from reactivex import Subject, Observable
 from reactivex.subject import BehaviorSubject
 
 from service.authorizer.log.car_logger import CarLogger
 from service.authorizer.log.model.car_log import CarLog
 from service.authorizer.log.repository.car_log_repository import CarLogRepository
+from service.authorizer.monitor.model.car_snapshot import CarSnapshot
 
 
 class ActualCarLogger(CarLogger):
@@ -35,15 +37,14 @@ class ActualCarLogger(CarLogger):
     def get_logs_by_car_registration_id(self, car_registration_id: str) -> list[CarLog]:
         return self.log_repository.get_logs_by_car_registration_id(car_registration_id)
 
-    def log(self, car_registration_id: str, entering: bool):
+    def log(self, car_snapshot: CarSnapshot, entering: bool):
         print('Logged')
-        # _, image_frame = self.video_stream_provider.get_stream().read()
         date_time = datetime.now()
-        filename = f'LOG_{date_time.strftime('%d%m%y_%H%M%S_%f')}'
-        # cv2.imwrite(filename, image_frame)
+        filename = f'LOG_{date_time.strftime('%d%m%y_%H%M%S_%f')}.jpg'
+        cv2.imwrite(filename, f'snapshots/{car_snapshot.snapshot}')
 
         sus_tracker = sorted(
-            self.get_logs_by_car_registration_id(car_registration_id),
+            self.get_logs_by_car_registration_id(car_snapshot.registration_id),
             key=lambda element: element.date_time,
         )
 
@@ -52,7 +53,7 @@ class ActualCarLogger(CarLogger):
             sus = last.entering
             log = CarLog(
                 date_time=date_time,
-                car_registration_id=car_registration_id,
+                car_registration_id=car_snapshot.registration_id,
                 entering=entering,
                 image=filename,
                 sus=sus,
@@ -66,7 +67,7 @@ class ActualCarLogger(CarLogger):
         else:
             log = CarLog(
                 date_time=date_time,
-                car_registration_id=car_registration_id,
+                car_registration_id=car_snapshot.registration_id,
                 entering=entering,
                 image=filename,
                 sus=False,

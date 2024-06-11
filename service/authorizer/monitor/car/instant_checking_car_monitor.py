@@ -33,6 +33,8 @@ class InstantCheckingCarMonitor(CarMonitor):
         if not self.registration_id_format.valid(registration_id):
             return
 
+        car_snapshot = replace(car_snapshot, registration_id=registration_id)
+
         try:
             if self.car_passed:
                 car = self.car_registry.get_car(registration_id)

@@ -49,7 +49,7 @@ class ActualParkingAccessControl(ParkingAccessControl):
             self.display_controller.show_car_info(car_snapshot.car)
             vacant_space = self.parking_space_counter.get_parking_space_count().vacant_space
             self.display_controller.update_vacant_space(vacant_space)
-            self.car_logger.log(car_registration_id=car_snapshot.car.registration_id, entering=self.entrance)
+            self.car_logger.log(car_snapshot, entering=self.entrance)
 
             vehicle_passed = self.gate_controller.open_gate()
             vehicle_passed.subscribe(on_next=lambda passed: self._vehicle_passed_on_next(passed))
