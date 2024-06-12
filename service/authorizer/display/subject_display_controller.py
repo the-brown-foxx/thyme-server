@@ -31,6 +31,9 @@ class SubjectDisplayController(DisplayController):
     def show_instructions(self):
         self.subject.on_next(None)
 
+    def show_parking_full(self):
+        self.subject.on_next('FULL')
+
     def show_car_info(self, car: Car):
         self.subject.on_next(car)
 

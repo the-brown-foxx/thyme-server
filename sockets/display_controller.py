@@ -20,11 +20,22 @@ async def handle_display_controller_websocket(
         'vacant_space': vacant_space,
     })
 
+    if vacant_space <= 0:
+        await websocket.send_json({
+            'status': 'FULL',
+            'event': 'Parking space is full',
+        })
+
     async def on_next(event: DisplayControllerEvent):
         if event is None:
             await websocket.send_json({
                 'status': 'IDLE',
                 'event': 'Waiting for a car to pass',
+            })
+        elif event == 'FULL':
+            await websocket.send_json({
+                'status': 'FULL',
+                'event': 'Parking space is full',
             })
         elif isinstance(event, int):
             await websocket.send_json({

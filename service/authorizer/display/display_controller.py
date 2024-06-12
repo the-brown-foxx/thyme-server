@@ -13,6 +13,10 @@ class DisplayController(ABC):
         pass
 
     @abstractmethod
+    def show_parking_full(self):
+        pass
+
+    @abstractmethod
     def show_car_info(self, car: Car):
         pass
 

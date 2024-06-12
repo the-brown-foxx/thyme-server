@@ -6,7 +6,6 @@ from service.authorizer.monitor.car.car_monitor import CarMonitor
 from service.authorizer.monitor.model.car_snapshot import CarSnapshot
 from service.authorizer.parking.parking_space_counter import ParkingSpaceCounter
 from service.exception import UnsetParkingSpaceError
-from service.registry.model.car import Car
 
 
 class ActualParkingAccessControl(ParkingAccessControl):
@@ -39,6 +38,9 @@ class ActualParkingAccessControl(ParkingAccessControl):
             pass
 
     def _on_car_detected(self, car_snapshot: CarSnapshot):
+        if self.entrance and self.parking_space_counter.get_parking_space_count().vacant_space <= 0:
+            return
+
         if car_snapshot.car is not None:
 
             if self.entrance:
@@ -61,3 +63,5 @@ class ActualParkingAccessControl(ParkingAccessControl):
         if passed:
             self.car_monitor.mark_car_as_passed()
             self.display_controller.show_instructions()
+            if self.entrance and self.parking_space_counter.get_parking_space_count().vacant_space <= 0:
+                self.display_controller.show_parking_full()

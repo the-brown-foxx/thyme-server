@@ -51,7 +51,7 @@ admin_authenticator: AdminAuthenticator = ActualAdminAuthenticator(
 
 car_registry_websocket_manager = WebsocketManager(admin_authenticator)
 
-registration_id_format = PhilippineRegistrationIdFormat()
+registration_id_format = AnyRegistrationIdFormat()
 registration_id_filter = ScoringRegistrationIdFilter(registration_id_format)
 car_repository = ActualCarRepository()
 car_registry = ActualCarRegistry(car_repository)
@@ -59,7 +59,7 @@ display_controller_subject = Subject[DisplayControllerEvent]()
 parking_space_counter = ActualParkingSpaceCounter(ActualParkingSpaceCountRepository())
 car_logger: CarLogger = ActualCarLogger(ActualCarLogRepository())
 
-entrance_video_stream_provider = SourceVideoStreamProvider(1, [64, 90, 120])
+entrance_video_stream_provider = SourceVideoStreamProvider(0, [64, 90, 120])
 entrance_license_plate_monitor = ModularLicensePlateMonitor(
     'Entrance',
     entrance_video_stream_provider,

@@ -12,6 +12,9 @@ class PrintingDisplayController(DisplayController):
     def show_instructions(self):
         print('Please pull up in front of the gate')
 
+    def show_parking_full(self):
+        print('Parking space is full!')
+
     def show_car_info(self, car: Car):
         greeting = 'Welcome' if self.entrance else "Bye bye"
         print(f'{greeting}, {car.color} {car.year} {car.make} {car.model} [{car.registration_id}]!')
