@@ -41,7 +41,7 @@ class ActualCarLogger(CarLogger):
         print('Logged')
         date_time = datetime.now()
         filename = f'LOG_{date_time.strftime('%d%m%y_%H%M%S_%f')}.jpg'
-        cv2.imwrite(filename, f'snapshots/{car_snapshot.snapshot}')
+        cv2.imwrite(f'snapshots/{filename}', car_snapshot.snapshot)
 
         sus_tracker = sorted(
             self.get_logs_by_car_registration_id(car_snapshot.registration_id),

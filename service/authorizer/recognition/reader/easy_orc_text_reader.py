@@ -1,5 +1,3 @@
-from typing import Optional
-
 from easyocr import easyocr
 
 from service.authorizer.recognition.detector.model.image import Image
@@ -11,12 +9,13 @@ class EasyOcrTextReader(TextReader):
     def __init__(self):
         self.ocr = easyocr.Reader(['en'])
 
-    def read(self, preprocessed_image: Image) -> Optional[TextDetection]:
+    def read(self, preprocessed_image: Image) -> list[TextDetection]:
         detections = self.ocr.readtext(preprocessed_image)
 
+        text_detections = []
         for detection in detections:
             _, text, confidence = detection
             text = text.upper().replace(' ', '')
-            return TextDetection(text, confidence)
+            text_detections.append(TextDetection(text, confidence))
 
-        return None
+        return text_detections

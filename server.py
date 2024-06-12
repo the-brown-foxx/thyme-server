@@ -25,6 +25,7 @@ from service.authorizer.monitor.license.modular_license_plate_monitor import Mod
 from service.authorizer.parking.actual_parking_space_counter import ActualParkingSpaceCounter
 from service.authorizer.parking.repository.actual_parking_space_count_repository import \
     ActualParkingSpaceCountRepository
+from service.authorizer.recognition.corrector.aggressive_text_corrector import AggressiveTextCorrector
 from service.authorizer.recognition.detector.yolo_license_plate_detector import YoloLicensePlateDetector
 from service.authorizer.recognition.preprocessor.license_plate_preprocessor import LicensePlatePreprocessor
 from service.authorizer.recognition.reader.easy_orc_text_reader import EasyOcrTextReader
@@ -50,7 +51,7 @@ admin_authenticator: AdminAuthenticator = ActualAdminAuthenticator(
 
 car_registry_websocket_manager = WebsocketManager(admin_authenticator)
 
-registration_id_format = AnyRegistrationIdFormat()  # TODO: Change to PhilippineRegistrationIdFormat()
+registration_id_format = PhilippineRegistrationIdFormat()
 registration_id_filter = ScoringRegistrationIdFilter(registration_id_format)
 car_repository = ActualCarRepository()
 car_registry = ActualCarRegistry(car_repository)
@@ -65,6 +66,7 @@ entrance_license_plate_monitor = ModularLicensePlateMonitor(
     YoloLicensePlateDetector(),
     LicensePlatePreprocessor(),
     EasyOcrTextReader(),
+    AggressiveTextCorrector(),
 )
 entrance_car_monitor = InstantCheckingCarMonitor(entrance_license_plate_monitor, car_registry, registration_id_format)
 entrance_gate_controller = PrintingGateController(entrance=True)
@@ -78,13 +80,14 @@ parking_entrance_control = ActualParkingAccessControl(
     entrance=True,
 )
 
-exit_video_stream_provider = SourceVideoStreamProvider(0, [64, 90, 120])
+exit_video_stream_provider = SourceVideoStreamProvider(3, [70, 100, 130])
 exit_license_plate_monitor = ModularLicensePlateMonitor(
     'Exit',
     exit_video_stream_provider,
     YoloLicensePlateDetector(),
     LicensePlatePreprocessor(),
     EasyOcrTextReader(),
+    AggressiveTextCorrector(),
 )
 exit_car_monitor = InstantCheckingCarMonitor(exit_license_plate_monitor, car_registry, registration_id_format)
 exit_gate_controller = PrintingGateController(entrance=False)
